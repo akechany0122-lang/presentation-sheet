@@ -40,29 +40,45 @@ a { color: inherit; }
 
 /* ============================================================ HERO ============================================================ */
 #hero {
-  position: relative;
-  height: 100svh;
-  min-height: 560px;
-  overflow: hidden;
-  background: #000;
+  --heart: clamp(90px, 17vmin, 150px);
+  position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #000;
 }
 #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-#hero-heart {
-  position: absolute; left: 50%; top: 50%; z-index: 2;
-  transform: translate(-50%, -50%); opacity: 0; transition: opacity 2s ease;
-  pointer-events: none;
-}
-#hero-heart.in { opacity: 1; }
 
+/* 呼吸するハートと、その周りのオーラ */
+#hero-aura {
+  position: absolute; left: 50%; top: 50%; z-index: 2; pointer-events: none;
+  width: calc(var(--heart) * 3.6); aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%); opacity: 0.3;
+  background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.16) 28%, rgba(255,255,255,0.05) 46%, transparent 68%);
+  filter: blur(8px); will-change: transform, opacity;
+}
+#hero-heart {
+  position: absolute; left: 50%; top: 50%; z-index: 3; width: var(--heart);
+  transform: translate(-50%, -50%); pointer-events: none; will-change: transform, opacity, filter;
+}
+
+/* ビジュアルが出来上がると同時に現れるロゴ */
 .hero-mark {
-  position: absolute; left: 0; right: 0; bottom: 11svh; z-index: 2;
-  display: flex; flex-direction: column; align-items: center; gap: 40px;
-  opacity: 0; transition: opacity 3s ease 0.4s; pointer-events: none;
+  position: absolute; left: 50%; top: 50%; z-index: 4; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: clamp(22px, 4vmin, 40px);
+  opacity: 0; transition: opacity 1.8s ease; pointer-events: none;
+}
+.hero-mark::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 50%; width: 170%; aspect-ratio: 1.5;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 40%, transparent 70%);
 }
 .hero-mark.show { opacity: 1; }
-.hero-mark img { width: clamp(150px, 20vw, 230px); opacity: 0.92; filter: drop-shadow(0 0 22px rgba(0,0,0,0.7)); }
-.hero-scroll { display: flex; }
-.hero-scroll .bar { width: 1px; height: 54px; background: linear-gradient(var(--fg-faint), transparent); animation: scrollbar 3.6s ease-in-out infinite; }
+.mark-heart { width: clamp(64px, 11vmin, 104px); filter: drop-shadow(0 0 18px rgba(0,0,0,0.5)); }
+.mark-word { width: clamp(150px, 22vmin, 240px); filter: drop-shadow(0 0 18px rgba(0,0,0,0.5)); }
+
+.hero-scroll {
+  position: absolute; bottom: 30px; left: 50%; z-index: 4; transform: translateX(-50%);
+  display: flex; opacity: 0; transition: opacity 2s ease 0.8s;
+}
+.hero-scroll.show { opacity: 1; }
+.hero-scroll .bar { width: 1px; height: 54px; background: linear-gradient(rgba(236,235,231,0.6), transparent); animation: scrollbar 3.6s ease-in-out infinite; }
 @keyframes scrollbar {
   0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
   40% { transform: scaleY(1); transform-origin: top; opacity: 1; }
