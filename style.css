@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500&family=Noto+Sans+JP:wght@200;300;400&display=swap');
+
+/* ================================================================
+   ココロノセイセイ — 暗い展示室のような、余白のデザイン
+   ロゴ：logo.png / logo2.png（白抜き版を assets/ に使用）
+================================================================ */
+:root {
+  --bg: #060606;
+  --bg-soft: #0a0a0a;
+  --fg: #ecebe7;
+  --fg-dim: rgba(236, 235, 231, 0.6);
+  --fg-faint: rgba(236, 235, 231, 0.32);
+  --line: rgba(236, 235, 231, 0.14);
+  --line-soft: rgba(236, 235, 231, 0.07);
+  --serif: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  --sans: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --col: 640px;          /* 本文の幅 */
+  --gutter: clamp(24px, 6vw, 96px);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-weight: 200;
+  line-height: 2.2;
+  letter-spacing: 0.06em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+::selection { background: var(--fg); color: #000; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ============================================================ HERO ============================================================ */
+#hero {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  background: #000;
+}
+#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+#hero-heart {
+  position: absolute; left: 50%; top: 50%; z-index: 2;
+  transform: translate(-50%, -50%); opacity: 0; transition: opacity 2s ease;
+  pointer-events: none;
+}
+#hero-heart.in { opacity: 1; }
+
+.hero-mark {
+  position: absolute; left: 0; right: 0; bottom: 11svh; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 40px;
+  opacity: 0; transition: opacity 3s ease 0.4s; pointer-events: none;
+}
+.hero-mark.show { opacity: 1; }
+.hero-mark img { width: clamp(150px, 20vw, 230px); opacity: 0.92; filter: drop-shadow(0 0 22px rgba(0,0,0,0.7)); }
+.hero-scroll { display: flex; }
+.hero-scroll .bar { width: 1px; height: 54px; background: linear-gradient(var(--fg-faint), transparent); animation: scrollbar 3.6s ease-in-out infinite; }
+@keyframes scrollbar {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  40% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  60% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ============================================================ SECTIONS ============================================================ */
+section.block { position: relative; padding: clamp(140px, 22vh, 260px) 0; }
+
+/* 章：番号は左の余白に置き、本文は細い一本の列に */
+.sec-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(0, var(--col)) minmax(0, 1fr);
+}
+.sec-grid > .sec-head { grid-column: 1 / 3; }
+.sec-grid > *:not(.sec-head) { grid-column: 2; }
+
+.sec-head { margin-bottom: clamp(56px, 9vh, 96px); display: flex; flex-direction: column; gap: 22px; }
+.sec-num { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.32em; color: var(--fg-faint); }
+.sec-title {
+  font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.6vw, 28px);
+  letter-spacing: 0.16em; margin: 0; line-height: 1.7;
+}
+.sec-lead { font-size: 15px; color: var(--fg); font-weight: 300; margin: 0 0 52px; }
+.sec-body p { font-size: 14px; color: var(--fg-dim); margin: 0 0 32px; }
+.sec-body strong, ul.plain strong { color: var(--fg); font-weight: 300; }
+code { font-family: var(--mono); font-size: 0.86em; color: var(--fg-dim); }
+
+/* ---- info table：壁面のキャプションのように ---- */
+table.info { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 28px; }
+table.info th, table.info td { text-align: left; padding: 22px 0; vertical-align: top; border-top: 1px solid var(--line-soft); }
+table.info tr:last-child th, table.info tr:last-child td { border-bottom: 1px solid var(--line-soft); }
+table.info th { width: 27%; padding-right: 24px; color: var(--fg-faint); font-weight: 300; font-size: 11.5px; letter-spacing: 0.16em; }
+table.info td { color: var(--fg-dim); line-height: 2; }
+
+/* ---- 五つの原則 ---- */
+.principle-grid { display: flex; flex-direction: column; margin-top: 8px; }
+.principle-card { padding: 44px 0; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 14px; }
+.principle-card:last-child { border-bottom: 1px solid var(--line-soft); }
+.principle-card .k { font-family: var(--serif); font-size: 18px; letter-spacing: 0.18em; }
+.principle-card .v { font-size: 13.5px; color: var(--fg-dim); }
+.principle-card .impl { font-size: 12px; color: var(--fg-faint); }
+
+/* ---- 体験の流れ ---- */
+.steps { display: flex; flex-direction: column; }
+.step { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 34px 0; border-top: 1px solid var(--line-soft); }
+.step:last-of-type { border-bottom: 1px solid var(--line-soft); }
+.step .n { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--fg-faint); padding-top: 6px; }
+.step .t { font-size: 14px; color: var(--fg-dim); }
+.step-note { margin-top: 44px; font-size: 12px; color: var(--fg-faint); }
+
+/* ---- 図 ---- */
+.diagram-wrap { margin-top: 20px; }
+.diagram-wrap svg { width: 100%; height: auto; display: block; }
+.diagram-caption { margin-top: 32px; font-size: 12px; color: var(--fg-faint); }
+
+/* ---- リスト ---- */
+ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+ul.plain li { position: relative; padding-left: 26px; font-size: 13.5px; color: var(--fg-dim); }
+ul.plain li::before { content: ''; position: absolute; left: 0; top: 1.25em; width: 10px; height: 1px; background: var(--fg-faint); }
+ul.plain.dense { margin-top: 44px; }
+
+/* ---- code ---- */
+.codebox { border-left: 1px solid var(--line); padding: 8px 0 8px 28px; margin: 32px 0 56px; overflow-x: auto; }
+.codebox code { font-size: 12px; line-height: 2; color: var(--fg-dim); white-space: pre-wrap; word-break: break-word; }
+.note { font-size: 12px; color: var(--fg-faint); margin: 44px 0 0; }
+
+/* ---- 制作プロセス ---- */
+.process-row { display: grid; grid-template-columns: 36px 1fr; gap: 0 12px; padding: 38px 0; border-top: 1px solid var(--line-soft); font-size: 13.5px; }
+.process-row:last-child { border-bottom: 1px solid var(--line-soft); }
+.process-row .idx { grid-row: 1 / 3; font-family: var(--mono); font-size: 11px; color: var(--fg-faint); padding-top: 6px; }
+.process-row .tried { color: var(--fg); }
+.process-row .found { color: var(--fg-dim); margin-top: 18px; }
+.process-row .lbl { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 4px; }
+
+/* ============================================================ 間奏：投影された絵 ============================================================ */
+.interlude { position: relative; height: clamp(360px, 80vh, 820px); overflow: hidden; background: #000; }
+.interlude img {
+  position: absolute; left: 50%; top: 50%; width: min(78vh, 90vw); max-width: none;
+  transform: translate(-50%, -50%); opacity: 0.55;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 68%);
+          mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 68%);
+  animation: drift 40s ease-in-out infinite alternate;
+}
+@keyframes drift { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06) rotate(1.5deg); } }
+
+/* ============================================================ 動画 ============================================================ */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(40px, 6vw, 88px) clamp(28px, 4vw, 56px); margin-top: 8px; }
+.video-frame { position: relative; }
+.video-frame .screen { position: relative; aspect-ratio: 16 / 10; background: #000; overflow: hidden; }
+.video-frame video, .video-frame .fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.video-frame .fallback {
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  background: #040404; color: var(--fg-faint);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; text-align: center; line-height: 2;
+}
+.video-frame .fallback .ring { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--fg-faint); }
+.video-frame .cap { padding-top: 18px; font-size: 11.5px; letter-spacing: 0.12em; color: var(--fg-faint); line-height: 1.9; }
+
+table.caption-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+table.caption-table th, table.caption-table td { text-align: left; padding: 20px 0; border-top: 1px solid var(--line-soft); }
+table.caption-table tr:last-child th, table.caption-table tr:last-child td { border-bottom: 1px solid var(--line-soft); }
+table.caption-table th { width: 27%; color: var(--fg-faint); font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.16em; font-weight: 300; }
+table.caption-table td { color: var(--fg-dim); }
+
+/* ============================================================ FOOTER ============================================================ */
+#footer { padding: clamp(160px, 26vh, 300px) 0 72px; text-align: center; }
+.footer-heart { width: 64px; margin: 0 auto clamp(72px, 12vh, 120px); opacity: 0.85; }
+.catchcopy-list { display: flex; flex-direction: column; gap: 26px; margin-bottom: clamp(88px, 14vh, 150px); }
+.catchcopy-list .cc { font-family: var(--serif); font-size: clamp(15px, 1.9vw, 19px); letter-spacing: 0.24em; color: var(--fg); }
+.footer-desc { max-width: var(--col); margin: 0 auto clamp(88px, 14vh, 150px); font-size: 13px; color: var(--fg-dim); text-align: left; line-height: 2.4; }
+.footer-cta {
+  display: inline-block; padding: 0 0 10px; border-bottom: 1px solid var(--fg-faint);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.34em; text-decoration: none; color: var(--fg);
+  transition: border-color 0.6s, opacity 0.6s;
+}
+.footer-cta:hover { border-color: var(--fg); opacity: 0.8; }
+.footer-wordmark { width: clamp(130px, 16vw, 180px); margin: clamp(120px, 20vh, 200px) auto 0; opacity: 0.7; }
+.footer-meta { margin-top: 56px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--fg-faint); display: flex; flex-direction: column; gap: 8px; }
+
+/* ============================================================ ゆっくり現れる ============================================================ */
+.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity 2s cubic-bezier(.2,.6,.2,1), transform 2s cubic-bezier(.2,.6,.2,1); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* ============================================================ RESPONSIVE ============================================================ */
+@media (max-width: 760px) {
+  .sec-grid { grid-template-columns: 1fr; }
+  .sec-grid > .sec-head, .sec-grid > *:not(.sec-head) { grid-column: 1; }
+  table.info th, table.caption-table th { width: 34%; }
+  .step { grid-template-columns: 44px 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-scroll .bar, .interlude img { animation: none; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+}
