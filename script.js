@@ -19,48 +19,55 @@
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
   if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); return; }
 
-  const BREATH = 2.0;     // ハートが呼吸する秒数（1呼吸）
-  const DUR = 1.9;        // 1粒がビジュアルに収まるまで
-  const SPREAD = 0.5;     // 粒ごとの出発の遅れ（最大）
-  const DONE = BREATH + DUR + SPREAD;   // ビジュアル完成の時刻
+  const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
+  // 砂が落ちる：ハートの上から少しずつ崩れ、画面いっぱいの粒子になる
+  const FALL = 1.15, A_SPREAD = 0.6, A_RAND = 0.2;
+  // 画面いっぱいの粒子が、中心から外へ、それぞれ形をつくってビジュアルになる
+  const FORM0 = 2.0, FORM_SWEEP = 0.5, FORM_RAND = 0.25, FORM_DUR = 1.7;
+  const DONE = BREATH + FORM0 + FORM_SWEEP + FORM_RAND + FORM_DUR - 0.4;   // ロゴが現れる時刻
 
   const VS = `
-    attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r;
+    attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f;
     uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell;
     varying vec3 v_col;
     varying float v_a;
-    vec2 rot(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
     void main(){
       float ph = a_r.y * 6.2831;
       // 粒ごとの居場所（わずかにずらして、格子に見せない）
       vec2 home = (a_uv - 0.5) * u_res * vec2(1.0, -1.0) * 1.03 + (a_r.xy - 0.5) * u_cell * 0.9;
       float dist = length(home) / (length(u_res) * 0.5);
-      float delay = a_r.x * ${SPREAD.toFixed(2)} + dist * 0.12;
-      float l = clamp((u_t - delay) / ${DUR.toFixed(2)}, 0.0, 1.0);
 
-      // 1) ハートから、ばらばらに落ちていく
-      float f = min(l / 0.42, 1.0);
-      vec2 p1 = a_start + vec2((a_r.x - 0.5) * u_img * 0.22, -(0.06 + 0.2 * a_r.z) * u_img) * f * f;
-      // 2) 落ちながら、ハートの周りをぐるりと囲み、それぞれの居場所へ
-      float m = clamp((l - 0.2) / 0.8, 0.0, 1.0);
-      float e = m * m * (3.0 - 2.0 * m);
-      float ang = (2.2 + 2.2 * a_r.y) * (1.0 - e) * smoothstep(0.0, 0.35, l);
-      vec2 p = rot(mix(p1, home, e), ang);
+      // 1) 砂のように：ハートの上の粒から順に、さらさらと落ち、画面じゅうに散らばる
+      float a = clamp((u_t - (a_f.z * ${A_SPREAD.toFixed(2)} + a_r.x * ${A_RAND.toFixed(2)})) / ${FALL.toFixed(2)}, 0.0, 1.0);
+      float sm = a * a * (3.0 - 2.0 * a);
+      float dip = u_img * (0.1 + 0.22 * a_r.z);
+      vec2 pf = vec2(mix(a_start.x, a_f.x, sm),
+                     mix(a_start.y, a_f.y, mix(a * a, sm, 0.5)) - dip * sin(3.14159 * a));
+      pf.x += sin(a * 7.0 + ph) * u_img * 0.025 * sin(3.14159 * a);
+      // 画面に広がった粒は、その場でざわめく
+      pf += vec2(sin(u_t * 0.9 + ph * 2.0), cos(u_t * 0.8 + ph * 3.0)) * 5.0 * smoothstep(0.6, 1.0, a);
 
-      // 3) 居場所についてから：粒それぞれが、波打ち続ける
-      float s = smoothstep(0.88, 1.0, l);
+      // 2) 中心から外へ、粒それぞれがうねりながら居場所へ向かい、絵の形になる
+      float b = clamp((u_t - (${FORM0.toFixed(2)} + dist * ${FORM_SWEEP.toFixed(2)} + a_r.x * ${FORM_RAND.toFixed(2)})) / ${FORM_DUR.toFixed(2)}, 0.0, 1.0);
+      float e = b * b * (3.0 - 2.0 * b);
+      vec2 curl = vec2(sin(home.y * 0.006 + u_t * 0.8 + ph), cos(home.x * 0.006 + u_t * 0.7 + ph));
+      vec2 p = mix(pf, home, e) + curl * sin(3.14159 * e) * u_img * 0.07;
+
+      // 3) 形になってから：粒それぞれが、蠢き、波打ち続ける
+      float s = smoothstep(0.9, 1.0, b);
       float br = sin(u_t * 0.85);
-      vec2 wave = vec2(sin(home.y * 0.008 + u_t * 0.7 + ph * 0.3), cos(home.x * 0.008 - u_t * 0.6 + ph * 0.3)) * u_cell * 1.5
-                + vec2(0.0, sin(home.x * 0.011 + home.y * 0.005 - u_t * 0.9)) * u_cell * 1.8
-                + vec2(cos(u_t * 0.5 + ph), sin(u_t * 0.43 + ph * 1.3)) * u_cell * 0.55;
-      p += (wave + home * 0.007 * br) * s;
+      vec2 wave = vec2(sin(home.y * 0.008 + u_t * 0.7 + ph * 0.3), cos(home.x * 0.008 - u_t * 0.6 + ph * 0.3)) * u_cell * 2.0
+                + vec2(0.0, sin(home.x * 0.011 + home.y * 0.005 - u_t * 0.9)) * u_cell * 2.4;
+      vec2 own = vec2(sin(u_t * (0.55 + a_r.z * 0.9) + ph * 3.0), cos(u_t * (0.5 + a_r.x * 0.8) + ph * 2.0)) * u_cell * 1.25
+               + vec2(cos(u_t * (1.3 + a_r.y) + ph), sin(u_t * (1.1 + a_r.z) + ph * 1.7)) * u_cell * 0.35;
+      p += (wave + own + home * 0.007 * br) * s;
 
       gl_Position = vec4(p / (u_res * 0.5), 0.0, 1.0);
-      float pulse = 1.0 + 0.22 * sin(u_t * 0.9 + ph + home.x * 0.008 - home.y * 0.005) * s;
-      gl_PointSize = max(1.8, mix(2.6, u_cell * 0.8 * pulse, e)) * u_dpr;
-      // 崩れはじめは白（ハートの色）、旅のあいだに絵の色へ
-      v_col = mix(vec3(1.0), a_col.rgb, smoothstep(0.0, 0.5, l)) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
-      v_a = u_t > 0.0 ? 1.0 : 0.0;
+      float pulse = 1.0 + 0.25 * sin(u_t * 0.9 + ph + home.x * 0.008 - home.y * 0.005) * s;
+      gl_PointSize = max(1.8, mix(2.4, u_cell * 0.8 * pulse, e)) * u_dpr;
+      // 砂は白（ハートの色）、形になるにつれて、絵の色へ
+      v_col = mix(vec3(0.95), a_col.rgb, smoothstep(0.0, 0.7, e)) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
+      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.85, 1.0, e);
     }`;
   const FS = `
     precision mediump float; varying vec3 v_col; varying float v_a;
@@ -123,7 +130,7 @@
     const hp = heartSize();
 
     const uv = new Float32Array(count * 2), col = new Uint8Array(count * 4);
-    const st = new Float32Array(count * 2), rr = new Float32Array(count * 3);
+    const st = new Float32Array(count * 2), rr = new Float32Array(count * 3), ff = new Float32Array(count * 3);
     for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
       const k = j * GX + i;
       uv[k * 2] = (i + 0.5) / GX; uv[k * 2 + 1] = (j + 0.5) / GY;
@@ -131,6 +138,8 @@
       const p = pts[(Math.random() * pts.length) | 0] || [0, 0];
       st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
+      ff[k * 3] = (Math.random() - 0.5) * W * 1.04; ff[k * 3 + 1] = (Math.random() - 0.5) * H * 1.04;
+      ff[k * 3 + 2] = Math.min(1, Math.max(0, (ar / 2 - p[1]) / ar)) * 0.85 + Math.random() * 0.15;   // ハートの上ほど早く落ちる
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
     function attr(name, data, size, type, norm) {
@@ -140,7 +149,7 @@
       gl.vertexAttribPointer(l, size, type, !!norm, 0, 0);
     }
     attr('a_uv', uv, 2, gl.FLOAT); attr('a_col', col, 4, gl.UNSIGNED_BYTE, true);
-    attr('a_start', st, 2, gl.FLOAT); attr('a_r', rr, 3, gl.FLOAT);
+    attr('a_start', st, 2, gl.FLOAT); attr('a_r', rr, 3, gl.FLOAT); attr('a_f', ff, 3, gl.FLOAT);
   }
 
   let t0 = performance.now(), shown = false, heartGone = false;
