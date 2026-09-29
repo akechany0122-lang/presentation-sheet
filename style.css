@@ -5,11 +5,11 @@
    ロゴ：logo.png / logo2.png（白抜き版を assets/ に使用）
 ================================================================ */
 :root {
-  --bg: #060606;
+  --bg: #000;
   --bg-soft: #0a0a0a;
   --fg: #ecebe7;
-  --fg-dim: rgba(236, 235, 231, 0.6);
-  --fg-faint: rgba(236, 235, 231, 0.32);
+  --fg-dim: rgba(236, 235, 231, 0.74);
+  --fg-faint: rgba(236, 235, 231, 0.5);
   --line: rgba(236, 235, 231, 0.14);
   --line-soft: rgba(236, 235, 231, 0.07);
   --serif: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
@@ -41,9 +41,10 @@ a { color: inherit; }
 /* ============================================================ HERO ============================================================ */
 #hero {
   --heart: clamp(90px, 17vmin, 150px);
-  position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #000;
+  position: relative; z-index: 2; height: 100svh; min-height: 560px;
 }
-#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+#bg-veil { position: fixed; inset: 0; z-index: 1; background: #050505; opacity: 0; pointer-events: none; }
 
 /* 呼吸するハートと、その周りのオーラ */
 #hero-aura {
@@ -87,7 +88,7 @@ a { color: inherit; }
 }
 
 /* ============================================================ SECTIONS ============================================================ */
-section.block { position: relative; padding: clamp(140px, 22vh, 260px) 0; }
+section.block { position: relative; z-index: 2; padding: clamp(140px, 22vh, 260px) 0; }
 
 /* 章：番号は左の余白に置き、本文は細い一本の列に */
 .sec-grid {
@@ -155,17 +156,6 @@ ul.plain.dense { margin-top: 44px; }
 .process-row .found { color: var(--fg-dim); margin-top: 18px; }
 .process-row .lbl { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 4px; }
 
-/* ============================================================ 間奏：投影された絵 ============================================================ */
-.interlude { position: relative; height: clamp(360px, 80vh, 820px); overflow: hidden; background: #000; }
-.interlude img {
-  position: absolute; left: 50%; top: 50%; width: min(78vh, 90vw); max-width: none;
-  transform: translate(-50%, -50%); opacity: 0.55;
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 68%);
-          mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 68%);
-  animation: drift 40s ease-in-out infinite alternate;
-}
-@keyframes drift { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06) rotate(1.5deg); } }
-
 /* ============================================================ 動画 ============================================================ */
 .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(40px, 6vw, 88px) clamp(28px, 4vw, 56px); margin-top: 8px; }
 .video-frame { position: relative; }
@@ -186,7 +176,7 @@ table.caption-table th { width: 27%; color: var(--fg-faint); font-family: var(--
 table.caption-table td { color: var(--fg-dim); }
 
 /* ============================================================ FOOTER ============================================================ */
-#footer { padding: clamp(160px, 26vh, 300px) 0 72px; text-align: center; }
+#footer { position: relative; z-index: 2; padding: clamp(160px, 26vh, 300px) 0 72px; text-align: center; }
 .footer-heart { width: 64px; margin: 0 auto clamp(72px, 12vh, 120px); opacity: 0.85; }
 .catchcopy-list { display: flex; flex-direction: column; gap: 26px; margin-bottom: clamp(88px, 14vh, 150px); }
 .catchcopy-list .cc { font-family: var(--serif); font-size: clamp(15px, 1.9vw, 19px); letter-spacing: 0.24em; color: var(--fg); }
@@ -214,6 +204,6 @@ table.caption-table td { color: var(--fg-dim); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hero-scroll .bar, .interlude img { animation: none; }
+  .hero-scroll .bar { animation: none; }
   .js .reveal { opacity: 1; transform: none; transition: none; }
 }

@@ -6,8 +6,8 @@
    以後  粒子が、呼吸するようにゆるやかに揺れ続ける
 ================================================================ */
 (function () {
-  const hero = document.getElementById('hero');
-  const canvas = document.getElementById('hero-canvas');
+  const canvas = document.getElementById('bg-canvas');
+  const veil = document.getElementById('bg-veil');
   const heartEl = document.getElementById('hero-heart');
   const auraEl = document.getElementById('hero-aura');
   const markEl = document.getElementById('hero-mark');
@@ -20,13 +20,12 @@
   if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); return; }
 
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
-  // 粒子はばらばらの時刻・速さでハートから離れ、画面に広がりながらそのままビジュアルになる
-  const SPREAD = 1.3;       // 粒ごとの出発時刻のばらつき
-  const DUR_MIN = 1.7, DUR_VAR = 0.8;
-  const DONE = BREATH + SPREAD + DUR_MIN + DUR_VAR - 0.5;   // ロゴが現れる時刻
+  // 粒子は一つひとつ、自分の時刻・向き・速さでハートを離れ、気の向くままに漂ってから、自分の居場所へ向かう
+  const SPREAD = 1.3;       // 離れはじめる時刻のばらつき
+  const DONE = BREATH + 4.0;   // ロゴが現れる時刻
 
   const VS = `
-    attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f;
+    attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f; attribute vec3 a_g;
     uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell;
     varying vec3 v_col;
     varying float v_a;
@@ -36,18 +35,26 @@
       // 粒ごとの居場所（わずかにずらして、格子に見せない）
       vec2 home = (a_uv - 0.5) * u_res * vec2(1.0, -1.0) * 1.03 + (a_r.xy - 0.5) * u_cell * 0.9;
 
-      // ばらばらの時刻・速さで、ハートから離れて画面へ広がる
-      float dur = ${DUR_MIN.toFixed(2)} + a_r.z * ${DUR_VAR.toFixed(2)};
-      float l = clamp((u_t - a_f.z * ${SPREAD.toFixed(2)}) / dur, 0.0, 1.0);
-      float e = mix(1.0 - pow(1.0 - l, 2.6), l * l * (3.0 - 2.0 * l), 0.4);
-      float bump = sin(3.14159 * l);
-      vec2 curl = vec2(sin(home.y * 0.006 + u_t * 0.8 + ph), cos(home.x * 0.006 + u_t * 0.7 + ph));
-      vec2 p = mix(a_start, home, e)
-             + curl * bump * u_img * (0.03 + 0.09 * a_r.x)
-             + vec2((a_r.x - 0.5) * 0.5, -(0.2 + a_r.z * 0.6)) * bump * u_img * 0.09;   // 砂のようにこぼれる
+      // --- 自我：粒ごとに、離れる時刻・向き・速さ・寄り道・迷う時間が違う ---
+      float tp = max(u_t - a_f.z * ${SPREAD.toFixed(2)}, 0.0);
+      float ang = a_g.x * 6.2831;
+      vec2 dir = vec2(cos(ang), sin(ang));
+      float sp = u_img * mix(0.12, 1.15, pow(a_g.y, 1.7));
+      float k = 0.9 + 1.8 * a_g.z;                         // 進むほど失速する、その強さ
+      vec2 pw = a_start + dir * sp * (1.0 - exp(-k * tp)) / k;
+      pw += vec2(-dir.y, dir.x) * sin(tp * (0.7 + a_r.z * 1.6) + ph) * u_img * 0.09 * (1.0 - exp(-tp));   // ふらふらと寄り道
+      pw.y -= u_img * (0.02 + 0.08 * a_g.z) * tp * tp;                                                   // 砂のように、少し落ちる
 
-      // 形になってから：粒それぞれが、蠢き、波打ち続ける
-      float s = smoothstep(0.9, 1.0, l);
+      // --- 迷ったあと、自分の気が向いた時に、居場所へ帰っていく ---
+      float tH = 0.5 + a_g.y * a_g.z * 0.5 + a_r.x * 1.3;
+      float dH = 0.9 + a_r.z * 0.8;
+      float l = clamp((tp - tH) / dH, 0.0, 1.0);
+      float h = l * l * (3.0 - 2.0 * l);
+      vec2 curl = vec2(sin(home.y * 0.006 + u_t * 0.8 + ph), cos(home.x * 0.006 + u_t * 0.7 + ph));
+      vec2 p = mix(pw, home, h) + curl * sin(3.14159 * l) * u_img * 0.05;
+
+      // --- 居場所についてから：粒それぞれが、蠢き、波打ち続ける ---
+      float s = smoothstep(0.85, 1.0, l);
       float br = sin(u_t * 0.85);
       vec2 wave = vec2(sin(home.y * 0.008 + u_t * 0.7 + ph * 0.3), cos(home.x * 0.008 - u_t * 0.6 + ph * 0.3)) * u_cell * 2.0
                 + vec2(0.0, sin(home.x * 0.011 + home.y * 0.005 - u_t * 0.9)) * u_cell * 2.4;
@@ -57,13 +64,14 @@
 
       gl_Position = vec4(p / (u_res * 0.5), 0.0, 1.0);
       float pulse = 1.0 + 0.25 * sin(u_t * 0.9 + ph + home.x * 0.008 - home.y * 0.005) * s;
-      gl_PointSize = max(1.8, mix(2.4, u_cell * 0.8 * pulse, e)) * u_dpr;
+      float freeSize = 1.9 + 2.3 * a_g.z * a_g.x;
+      gl_PointSize = max(1.8, mix(freeSize, u_cell * 0.92 * pulse, h)) * u_dpr;
 
-      // 広がる途中、粒ごとにばらばらに色が移ろい、最後に絵の色へ落ち着く
-      vec3 wander = mix(vec3(1.0), hue(fract(a_r.y * 3.0 + u_t * (0.25 + a_r.z * 0.5))), 0.85);
-      float toImg = smoothstep(0.55, 1.0, l);
+      // 漂う間、粒ごとに違う速さで色が移ろい、帰るにつれて絵の色へ
+      vec3 wander = mix(vec3(1.0), hue(fract(a_r.y * 3.0 + u_t * (0.15 + a_r.z * 0.6))), smoothstep(0.0, 0.6, tp) * 0.9);
+      float toImg = smoothstep(0.35, 1.0, l);
       v_col = mix(wander, a_col.rgb, toImg) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
-      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.9, 1.0, e);
+      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.9, 1.0, h);
     }`;
   const FS = `
     precision mediump float; varying vec3 v_col; varying float v_a;
@@ -71,7 +79,7 @@
       vec2 d = gl_PointCoord - 0.5;
       float r = dot(d, d);
       if (r > 0.25) discard;
-      gl_FragColor = vec4(min(v_col * 1.3, 1.0), v_a * smoothstep(0.25, 0.14, r));
+      gl_FragColor = vec4(min(v_col * 1.45, 1.0), v_a * smoothstep(0.25, 0.14, r));
     }`;
 
   function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
@@ -88,7 +96,7 @@
   let loaded = 0;
   function onLoad() { if (++loaded === 2) begin(); }
   motif.onload = onLoad; heartImg.onload = onLoad;
-  motif.src = 'assets/motif_wide.jpg';
+  motif.src = 'assets/motif_base.jpg';
   heartImg.src = 'assets/logo2-heart-white.png';
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -98,11 +106,11 @@
 
   // 画面の大きさに合わせて粒子とその色を組み直す
   function build() {
-    W = hero.clientWidth; H = hero.clientHeight;
+    W = window.innerWidth; H = window.innerHeight;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    cell = Math.max(3.4, Math.sqrt((W * H) / 300000));
+    cell = Math.max(2.7, Math.sqrt((W * H) / 420000));
     const GX = Math.ceil(W / cell), GY = Math.ceil(H / cell);
     count = GX * GY;
 
@@ -126,7 +134,7 @@
     const hp = heartSize();
 
     const uv = new Float32Array(count * 2), col = new Uint8Array(count * 4);
-    const st = new Float32Array(count * 2), rr = new Float32Array(count * 3), ff = new Float32Array(count * 3);
+    const st = new Float32Array(count * 2), rr = new Float32Array(count * 3), ff = new Float32Array(count * 3), gg = new Float32Array(count * 3);
     for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
       const k = j * GX + i;
       uv[k * 2] = (i + 0.5) / GX; uv[k * 2 + 1] = (j + 0.5) / GY;
@@ -134,9 +142,10 @@
       const p = pts[(Math.random() * pts.length) | 0] || [0, 0];
       st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
+      gg[k * 3] = Math.random(); gg[k * 3 + 1] = Math.random(); gg[k * 3 + 2] = Math.random();
       // 崩れる順は、ばらばらの粒と、ところどころのまとまりの混ぜ合わせ
       const nz = 0.5 + 0.25 * Math.sin(p[0] * 17 + 1.3) + 0.25 * Math.sin(p[1] * 21 - p[0] * 9 + 0.4);
-      ff[k * 3 + 2] = Math.min(1, Math.max(0, 0.6 * Math.random() + 0.4 * nz));
+      ff[k * 3 + 2] = Math.pow(Math.min(1, Math.max(0, 0.65 * Math.random() + 0.35 * nz)), 1.4);
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
     function attr(name, data, size, type, norm) {
@@ -146,13 +155,16 @@
       gl.vertexAttribPointer(l, size, type, !!norm, 0, 0);
     }
     attr('a_uv', uv, 2, gl.FLOAT); attr('a_col', col, 4, gl.UNSIGNED_BYTE, true);
-    attr('a_start', st, 2, gl.FLOAT); attr('a_r', rr, 3, gl.FLOAT); attr('a_f', ff, 3, gl.FLOAT);
+    attr('a_start', st, 2, gl.FLOAT); attr('a_r', rr, 3, gl.FLOAT); attr('a_f', ff, 3, gl.FLOAT); attr('a_g', gg, 3, gl.FLOAT);
   }
 
   let t0 = performance.now(), shown = false, heartGone = false;
   function begin() {
     build();
-    let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 180); });
+    let rt; window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => { if (window.innerWidth !== W || Math.abs(window.innerHeight - H) > 140) build(); }, 180);
+    });
     if (reduced) { t0 = performance.now() - (DONE + 30) * 1000; }
     else t0 = performance.now();
     requestAnimationFrame(frame);
@@ -163,6 +175,7 @@
 
   function frame(now) {
     const t = (now - t0) / 1000;
+    veil.style.opacity = (Math.min(Math.max(window.scrollY / (window.innerHeight * 0.85), 0), 1) * 0.5).toFixed(3);
     if (!heartGone) {
       if (t < BREATH) {
         const b = breathe(t / BREATH);

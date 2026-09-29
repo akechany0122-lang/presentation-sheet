@@ -11,9 +11,12 @@
 </head>
 <body>
 
+<!-- 背景：画面全体に敷かれた粒子。ページを通して途切れない -->
+<canvas id="bg-canvas"></canvas>
+<div id="bg-veil"></div>
+
 <!-- ============================================================ HERO ============================================================ -->
 <section id="hero">
-  <canvas id="hero-canvas"></canvas>
   <div id="hero-aura"></div>
   <img id="hero-heart" src="assets/logo2-heart-white.png" alt="" draggable="false">
   <div class="hero-mark" id="hero-mark">
@@ -76,8 +79,6 @@
   </div>
   </div>
 </section>
-
-<div class="interlude" aria-hidden="true"><img src="assets/motif_base.jpg" alt=""></div>
 
 <!-- ============================================================ 体験の流れ ============================================================ -->
 <section class="block" id="flow">
