@@ -7,7 +7,8 @@
 ================================================================ */
 (function () {
   const canvas = document.getElementById('bg-canvas');
-  const veil = document.getElementById('bg-veil');
+  const hero = document.getElementById('hero');
+  const fadeEl = document.getElementById('hero-fade');
   const heartEl = document.getElementById('hero-heart');
   const auraEl = document.getElementById('hero-aura');
   const markEl = document.getElementById('hero-mark');
@@ -34,7 +35,7 @@
       vec2 home = (a_uv - 0.5) * u_res * vec2(1.0, -1.0) * 1.03 + (a_r.xy - 0.5) * u_cell * 0.9;
 
       // --- 1) 霧になる：ハートの粒子が、それぞれの速さ・時刻で、息を吐くように画面へ広がる ---
-      vec2 F = a_f.xy;
+      vec2 F = home + a_f.xy;   // 霧：自分の居場所のまわりに、ふわりとほどけて広がる
       float dF = length(F) / (length(u_res) * 0.5);
       float a = clamp((u_t - (dF * 0.9 + a_r.x * 0.35 + a_g.x * 0.3)) / (1.3 + a_r.z * 0.8), 0.0, 1.0);
       float ea = 1.0 - pow(1.0 - a, 2.4);
@@ -64,7 +65,7 @@
       gl_PointSize = max(1.8, mix(fogSize, u_cell * 0.92 * pulse, h)) * u_dpr;
 
       // 白（ハート）→ 灰白い霧 → 絵の色。色は、立ち上がりの前線とともに染まっていく
-      vec3 fog = vec3(0.84, 0.89, 0.92) * (0.9 + 0.1 * a_r.x);
+      vec3 fog = mix(vec3(0.82, 0.86, 0.9), a_col.rgb, 0.75) * (1.0 + 0.15 * a_r.x);   // ビジュアルの色を含んだ、淡い霧
       vec3 c = mix(vec3(1.0), fog, smoothstep(0.0, 0.5, a));
       v_col = mix(c, a_col.rgb, smoothstep(0.05, 0.95, l)) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
       v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.88, 1.0, h);
@@ -102,7 +103,7 @@
 
   // 画面の大きさに合わせて粒子とその色を組み直す
   function build() {
-    W = window.innerWidth; H = window.innerHeight;
+    W = hero.clientWidth; H = hero.clientHeight;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -139,7 +140,8 @@
       st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
       gg[k * 3] = Math.random(); gg[k * 3 + 1] = Math.random(); gg[k * 3 + 2] = Math.random();
-      ff[k * 3] = (Math.random() - 0.5) * W * 1.06; ff[k * 3 + 1] = (Math.random() - 0.5) * H * 1.06;   // 霧の中での居場所
+      const ang = Math.random() * 6.2832, rad = Math.pow(Math.random(), 1.5) * Math.min(W, H) * 0.16;
+      ff[k * 3] = Math.cos(ang) * rad; ff[k * 3 + 1] = Math.sin(ang) * rad;   // 霧：居場所からのずれ
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
     function attr(name, data, size, type, norm) {
@@ -157,7 +159,7 @@
     build();
     let rt; window.addEventListener('resize', () => {
       clearTimeout(rt);
-      rt = setTimeout(() => { if (window.innerWidth !== W || Math.abs(window.innerHeight - H) > 140) build(); }, 180);
+      rt = setTimeout(() => { if (hero.clientWidth !== W || Math.abs(hero.clientHeight - H) > 140) build(); }, 180);
     });
     if (reduced) { t0 = performance.now() - (DONE + 30) * 1000; }
     else t0 = performance.now();
@@ -169,7 +171,9 @@
 
   function frame(now) {
     const t = (now - t0) / 1000;
-    veil.style.opacity = (Math.min(Math.max(window.scrollY / (window.innerHeight * 0.85), 0), 1) * 0.5).toFixed(3);
+    const sy = window.scrollY;
+    fadeEl.style.opacity = Math.min(Math.max(sy / (H * 0.18), 0), 1).toFixed(3);
+    if (sy > H * 1.05) { requestAnimationFrame(frame); return; }   // 画面外では描かない
     if (!heartGone) {
       if (t < BREATH) {
         const b = breathe(t / BREATH);
