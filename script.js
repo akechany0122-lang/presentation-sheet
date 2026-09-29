@@ -8,7 +8,6 @@
 (function () {
   const canvas = document.getElementById('bg-canvas');
   const hero = document.getElementById('hero');
-  const fadeEl = document.getElementById('hero-fade');
   const heartEl = document.getElementById('hero-heart');
   const auraEl = document.getElementById('hero-aura');
   const markEl = document.getElementById('hero-mark');
@@ -23,11 +22,12 @@
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
   // 参考映像の変容：ハートの白い粒子が、霧のように画面へ広がり、
   // その霧の中から、上のほうから順に色と形が立ち上がってビジュアルになる
-  const DONE = BREATH + 4.2;   // ロゴが現れる時刻
+  const DONE_PT = 4.2;         // 崩れはじめから、ロゴが現れるまで
+  const EXTRA = 0.45;          // 画面の下にはみ出して敷く粒子（スクロール時に、切れ目なく黒へ溶ける）
 
   const VS = `
     attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f; attribute vec3 a_g;
-    uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell;
+    uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell; uniform vec2 u_hc;
     varying vec3 v_col;
     varying float v_a;
     void main(){
@@ -36,7 +36,7 @@
 
       // --- 1) 霧になる：ハートの粒子が、それぞれの速さ・時刻で、息を吐くように画面へ広がる ---
       vec2 F = home + a_f.xy;   // 霧：自分の居場所のまわりに、ふわりとほどけて広がる
-      float dF = length(F) / (length(u_res) * 0.5);
+      float dF = length(F - u_hc) / (length(u_res) * 0.5);
       float a = clamp((u_t - (dF * 0.9 + a_r.x * 0.35 + a_g.x * 0.3)) / (1.3 + a_r.z * 0.8), 0.0, 1.0);
       float ea = 1.0 - pow(1.0 - a, 2.4);
       vec2 flow = vec2(sin(F.y * 0.005 + u_t * 0.6 + ph), cos(F.x * 0.005 + u_t * 0.5 + ph));
@@ -87,23 +87,24 @@
   gl.useProgram(prog);
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   const U = (n) => gl.getUniformLocation(prog, n);
-  const uRes = U('u_res'), uT = U('u_t'), uDpr = U('u_dpr'), uImg = U('u_img'), uCell = U('u_cell');
+  const uRes = U('u_res'), uT = U('u_t'), uDpr = U('u_dpr'), uImg = U('u_img'), uCell = U('u_cell'), uHc = U('u_hc');
 
   const motif = new Image(), heartImg = new Image();
-  let loaded = 0;
+  let loaded = 0, ready = false;
   function onLoad() { if (++loaded === 2) begin(); }
   motif.onload = onLoad; heartImg.onload = onLoad;
   motif.src = 'assets/motif_base.jpg';
   heartImg.src = 'assets/logo2-heart-white.png';
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  let W = 0, H = 0, count = 0, cell = 3, bufs = [];
+  let W = 0, H = 0, H0 = 0, count = 0, cell = 3, bufs = [];
 
-  function heartSize() { return Math.max(90, Math.min(150, Math.min(W, H) * 0.17)); }
+  function heartSize() { return Math.max(90, Math.min(150, Math.min(W, H0) * 0.17)); }
 
   // 画面の大きさに合わせて粒子とその色を組み直す
   function build() {
-    W = hero.clientWidth; H = hero.clientHeight;
+    W = hero.clientWidth; H0 = hero.clientHeight; H = Math.round(H0 * (1 + EXTRA));
+    canvas.style.height = H + 'px';
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -111,14 +112,21 @@
     const GX = Math.ceil(W / cell), GY = Math.ceil(H / cell);
     count = GX * GY;
 
-    // 横長の絵を、画面いっぱいに（cover）サンプリング
-    const ia = motif.naturalWidth / motif.naturalHeight, sa = W / H;
+    // 絵を、最初の1画面いっぱいに（cover）敷き、その続きを下へ延ばしてサンプリング
+    const ia = motif.naturalWidth / motif.naturalHeight, sa = W / H0;
     let sx = 0, sy = 0, sw = motif.naturalWidth, sh_ = motif.naturalHeight;
     if (sa > ia) { sh_ = sw / sa; sy = (motif.naturalHeight - sh_) / 2; }
     else { sw = sh_ * sa; sx = (motif.naturalWidth - sw) / 2; }
+    const shExt = sh_ * (H / H0);
+    // 絵の下端を折り返して延ばし、下へ続く部分にも、途切れなく粒子の色を与える
+    const nw = motif.naturalWidth, nh = motif.naturalHeight;
+    const src = document.createElement('canvas'); src.width = nw; src.height = nh * 2;
+    const sc = src.getContext('2d');
+    sc.drawImage(motif, 0, 0);
+    sc.save(); sc.translate(0, nh * 2); sc.scale(1, -1); sc.drawImage(motif, 0, 0); sc.restore();
     const c = document.createElement('canvas'); c.width = GX; c.height = GY;
     const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high';
-    cx.drawImage(motif, sx, sy, sw, sh_, 0, 0, GX, GY);
+    cx.drawImage(src, sx, sy, sw, shExt, 0, 0, GX, GY);
     const img = cx.getImageData(0, 0, GX, GY).data;
 
     // 出発点：ハートのシルエットの中のランダムな点
@@ -137,10 +145,10 @@
       uv[k * 2] = (i + 0.5) / GX; uv[k * 2 + 1] = (j + 0.5) / GY;
       col[k * 4] = img[k * 4]; col[k * 4 + 1] = img[k * 4 + 1]; col[k * 4 + 2] = img[k * 4 + 2]; col[k * 4 + 3] = 255;
       const p = pts[(Math.random() * pts.length) | 0] || [0, 0];
-      st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
+      st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp + (H - H0) / 2;   // ハートは最初の1画面の中央
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
       gg[k * 3] = Math.random(); gg[k * 3 + 1] = Math.random(); gg[k * 3 + 2] = Math.random();
-      const ang = Math.random() * 6.2832, rad = Math.pow(Math.random(), 1.5) * Math.min(W, H) * 0.16;
+      const ang = Math.random() * 6.2832, rad = Math.pow(Math.random(), 1.5) * Math.min(W, H0) * 0.16;
       ff[k * 3] = Math.cos(ang) * rad; ff[k * 3 + 1] = Math.sin(ang) * rad;   // 霧：居場所からのずれ
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
@@ -154,36 +162,37 @@
     attr('a_start', st, 2, gl.FLOAT); attr('a_r', rr, 3, gl.FLOAT); attr('a_f', ff, 3, gl.FLOAT); attr('a_g', gg, 3, gl.FLOAT);
   }
 
-  let t0 = performance.now(), shown = false, heartGone = false;
+  // ハートは、サイトを開いた瞬間から呼吸している（絵の読み込みを待たない）。
+  // 絵の準備ができたら、そのとき呼吸がひと巡りするのを待って、崩れはじめる。
+  const tStart = performance.now();
+  let burstT = null, shown = false, heartGone = false;
   function begin() {
     build();
     let rt; window.addEventListener('resize', () => {
       clearTimeout(rt);
-      rt = setTimeout(() => { if (hero.clientWidth !== W || Math.abs(hero.clientHeight - H) > 140) build(); }, 180);
+      rt = setTimeout(() => { if (hero.clientWidth !== W || Math.abs(hero.clientHeight - H0) > 140) build(); }, 180);
     });
-    if (reduced) { t0 = performance.now() - (DONE + 30) * 1000; }
-    else t0 = performance.now();
-    requestAnimationFrame(frame);
+    const now = (performance.now() - tStart) / 1000;
+    burstT = reduced ? -1000 : Math.max(BREATH, Math.ceil(now / BREATH) * BREATH);
+    ready = true;
   }
+  if (reduced) { heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
 
   // ゆっくり滑らかに：0→1→0（両端で速度ゼロ）
   const breathe = (x) => 0.5 - 0.5 * Math.cos(Math.PI * 2 * x);
 
   function frame(now) {
-    const t = (now - t0) / 1000;
-    const sy = window.scrollY;
-    fadeEl.style.opacity = Math.min(Math.max(sy / (H * 0.18), 0), 1).toFixed(3);
-    if (sy > H * 1.05) { requestAnimationFrame(frame); return; }   // 画面外では描かない
-    if (!heartGone) {
-      if (t < BREATH) {
-        const b = breathe(t / BREATH);
+    const t = (now - tStart) / 1000;
+    if (!heartGone && !reduced) {
+      if (burstT === null || t < burstT) {
+        const b = breathe((t % BREATH) / BREATH);
         heartEl.style.transform = `translate(-50%,-50%) scale(${(1 + 0.085 * b).toFixed(4)})`;
         heartEl.style.filter = `drop-shadow(0 0 ${(10 + 26 * b).toFixed(1)}px rgba(255,255,255,${(0.4 + 0.45 * b).toFixed(3)}))`;
         auraEl.style.opacity = (0.28 + 0.62 * b).toFixed(3);
         auraEl.style.transform = `translate(-50%,-50%) scale(${(0.92 + 0.3 * b).toFixed(4)})`;
       } else {
         // 崩れる：ハートは粒子に置き換わり、オーラは光として広がって消える
-        const k = Math.min((t - BREATH) / 0.5, 1), q = 1 - Math.pow(1 - k, 2);
+        const k = Math.min((t - burstT) / 0.5, 1), q = 1 - Math.pow(1 - k, 2);
         heartEl.style.opacity = String(Math.max(0, 1 - k * 3));
         heartEl.style.transform = `translate(-50%,-50%) scale(${(1 + 0.03 * q).toFixed(4)})`;
         auraEl.style.opacity = (0.9 * (1 - q)).toFixed(3);
@@ -191,14 +200,17 @@
         if (k >= 1) { heartGone = true; heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
       }
     }
-    const pt = t - BREATH;
-    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(uRes, W, H); gl.uniform1f(uT, pt > 0 ? pt : -1); gl.uniform1f(uDpr, DPR);
-    gl.uniform1f(uImg, Math.min(W, H)); gl.uniform1f(uCell, cell);
-    if (pt > 0) gl.drawArrays(gl.POINTS, 0, count);
-    if (!shown && t >= DONE) { shown = true; showFinal(); }
+    if (burstT !== null && window.scrollY < H0 * 1.5) {   // 画面外では描かない
+      const pt = t - burstT;
+      gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform2f(uRes, W, H); gl.uniform1f(uT, pt > 0 ? pt : -1); gl.uniform1f(uDpr, DPR);
+      gl.uniform1f(uImg, Math.min(W, H0)); gl.uniform1f(uCell, cell); gl.uniform2f(uHc, 0, (H - H0) / 2);
+      if (pt > 0) gl.drawArrays(gl.POINTS, 0, count);
+      if (!shown && pt >= DONE_PT) { shown = true; showFinal(); }
+    }
     requestAnimationFrame(frame);
   }
+  requestAnimationFrame(frame);
 })();
 
 /* ================================================================
