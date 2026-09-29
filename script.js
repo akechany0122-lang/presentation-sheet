@@ -20,41 +20,34 @@
   if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); return; }
 
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
-  // 砂が落ちる：ハートの上から少しずつ崩れ、画面いっぱいの粒子になる
-  const FALL = 1.15, A_SPREAD = 0.6, A_RAND = 0.2;
-  // 画面いっぱいの粒子が、中心から外へ、それぞれ形をつくってビジュアルになる
-  const FORM0 = 2.0, FORM_SWEEP = 0.5, FORM_RAND = 0.25, FORM_DUR = 1.7;
-  const DONE = BREATH + FORM0 + FORM_SWEEP + FORM_RAND + FORM_DUR - 0.4;   // ロゴが現れる時刻
+  // 粒子はばらばらの時刻・速さでハートから離れ、画面に広がりながらそのままビジュアルになる
+  const SPREAD = 1.3;       // 粒ごとの出発時刻のばらつき
+  const DUR_MIN = 1.7, DUR_VAR = 0.8;
+  const DONE = BREATH + SPREAD + DUR_MIN + DUR_VAR - 0.5;   // ロゴが現れる時刻
 
   const VS = `
     attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f;
     uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell;
     varying vec3 v_col;
     varying float v_a;
+    vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
     void main(){
       float ph = a_r.y * 6.2831;
       // 粒ごとの居場所（わずかにずらして、格子に見せない）
       vec2 home = (a_uv - 0.5) * u_res * vec2(1.0, -1.0) * 1.03 + (a_r.xy - 0.5) * u_cell * 0.9;
-      float dist = length(home) / (length(u_res) * 0.5);
 
-      // 1) 砂のように：ハートの上の粒から順に、さらさらと落ち、画面じゅうに散らばる
-      float a = clamp((u_t - (a_f.z * ${A_SPREAD.toFixed(2)} + a_r.x * ${A_RAND.toFixed(2)})) / ${FALL.toFixed(2)}, 0.0, 1.0);
-      float sm = a * a * (3.0 - 2.0 * a);
-      float dip = u_img * (0.1 + 0.22 * a_r.z);
-      vec2 pf = vec2(mix(a_start.x, a_f.x, sm),
-                     mix(a_start.y, a_f.y, mix(a * a, sm, 0.5)) - dip * sin(3.14159 * a));
-      pf.x += sin(a * 7.0 + ph) * u_img * 0.025 * sin(3.14159 * a);
-      // 画面に広がった粒は、その場でざわめく
-      pf += vec2(sin(u_t * 0.9 + ph * 2.0), cos(u_t * 0.8 + ph * 3.0)) * 5.0 * smoothstep(0.6, 1.0, a);
-
-      // 2) 中心から外へ、粒それぞれがうねりながら居場所へ向かい、絵の形になる
-      float b = clamp((u_t - (${FORM0.toFixed(2)} + dist * ${FORM_SWEEP.toFixed(2)} + a_r.x * ${FORM_RAND.toFixed(2)})) / ${FORM_DUR.toFixed(2)}, 0.0, 1.0);
-      float e = b * b * (3.0 - 2.0 * b);
+      // ばらばらの時刻・速さで、ハートから離れて画面へ広がる
+      float dur = ${DUR_MIN.toFixed(2)} + a_r.z * ${DUR_VAR.toFixed(2)};
+      float l = clamp((u_t - a_f.z * ${SPREAD.toFixed(2)}) / dur, 0.0, 1.0);
+      float e = mix(1.0 - pow(1.0 - l, 2.6), l * l * (3.0 - 2.0 * l), 0.4);
+      float bump = sin(3.14159 * l);
       vec2 curl = vec2(sin(home.y * 0.006 + u_t * 0.8 + ph), cos(home.x * 0.006 + u_t * 0.7 + ph));
-      vec2 p = mix(pf, home, e) + curl * sin(3.14159 * e) * u_img * 0.07;
+      vec2 p = mix(a_start, home, e)
+             + curl * bump * u_img * (0.03 + 0.09 * a_r.x)
+             + vec2((a_r.x - 0.5) * 0.5, -(0.2 + a_r.z * 0.6)) * bump * u_img * 0.09;   // 砂のようにこぼれる
 
-      // 3) 形になってから：粒それぞれが、蠢き、波打ち続ける
-      float s = smoothstep(0.9, 1.0, b);
+      // 形になってから：粒それぞれが、蠢き、波打ち続ける
+      float s = smoothstep(0.9, 1.0, l);
       float br = sin(u_t * 0.85);
       vec2 wave = vec2(sin(home.y * 0.008 + u_t * 0.7 + ph * 0.3), cos(home.x * 0.008 - u_t * 0.6 + ph * 0.3)) * u_cell * 2.0
                 + vec2(0.0, sin(home.x * 0.011 + home.y * 0.005 - u_t * 0.9)) * u_cell * 2.4;
@@ -65,9 +58,12 @@
       gl_Position = vec4(p / (u_res * 0.5), 0.0, 1.0);
       float pulse = 1.0 + 0.25 * sin(u_t * 0.9 + ph + home.x * 0.008 - home.y * 0.005) * s;
       gl_PointSize = max(1.8, mix(2.4, u_cell * 0.8 * pulse, e)) * u_dpr;
-      // 砂は白（ハートの色）、形になるにつれて、絵の色へ
-      v_col = mix(vec3(0.95), a_col.rgb, smoothstep(0.0, 0.7, e)) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
-      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.85, 1.0, e);
+
+      // 広がる途中、粒ごとにばらばらに色が移ろい、最後に絵の色へ落ち着く
+      vec3 wander = mix(vec3(1.0), hue(fract(a_r.y * 3.0 + u_t * (0.25 + a_r.z * 0.5))), 0.85);
+      float toImg = smoothstep(0.55, 1.0, l);
+      v_col = mix(wander, a_col.rgb, toImg) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
+      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.9, 1.0, e);
     }`;
   const FS = `
     precision mediump float; varying vec3 v_col; varying float v_a;
@@ -138,8 +134,9 @@
       const p = pts[(Math.random() * pts.length) | 0] || [0, 0];
       st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
-      ff[k * 3] = (Math.random() - 0.5) * W * 1.04; ff[k * 3 + 1] = (Math.random() - 0.5) * H * 1.04;
-      ff[k * 3 + 2] = Math.min(1, Math.max(0, (ar / 2 - p[1]) / ar)) * 0.85 + Math.random() * 0.15;   // ハートの上ほど早く落ちる
+      // 崩れる順は、ばらばらの粒と、ところどころのまとまりの混ぜ合わせ
+      const nz = 0.5 + 0.25 * Math.sin(p[0] * 17 + 1.3) + 0.25 * Math.sin(p[1] * 21 - p[0] * 9 + 0.4);
+      ff[k * 3 + 2] = Math.min(1, Math.max(0, 0.6 * Math.random() + 0.4 * nz));
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
     function attr(name, data, size, type, norm) {
