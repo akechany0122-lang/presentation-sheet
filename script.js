@@ -20,40 +20,36 @@
   if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); return; }
 
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
-  // 粒子は一つひとつ、自分の時刻・向き・速さでハートを離れ、気の向くままに漂ってから、自分の居場所へ向かう
-  const SPREAD = 1.3;       // 離れはじめる時刻のばらつき
-  const DONE = BREATH + 4.0;   // ロゴが現れる時刻
+  // 参考映像の変容：ハートの白い粒子が、霧のように画面へ広がり、
+  // その霧の中から、上のほうから順に色と形が立ち上がってビジュアルになる
+  const DONE = BREATH + 4.2;   // ロゴが現れる時刻
 
   const VS = `
     attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f; attribute vec3 a_g;
     uniform vec2 u_res; uniform float u_t; uniform float u_dpr; uniform float u_img; uniform float u_cell;
     varying vec3 v_col;
     varying float v_a;
-    vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
     void main(){
       float ph = a_r.y * 6.2831;
-      // 粒ごとの居場所（わずかにずらして、格子に見せない）
       vec2 home = (a_uv - 0.5) * u_res * vec2(1.0, -1.0) * 1.03 + (a_r.xy - 0.5) * u_cell * 0.9;
 
-      // --- 自我：粒ごとに、離れる時刻・向き・速さ・寄り道・迷う時間が違う ---
-      float tp = max(u_t - a_f.z * ${SPREAD.toFixed(2)}, 0.0);
-      float ang = a_g.x * 6.2831;
-      vec2 dir = vec2(cos(ang), sin(ang));
-      float sp = u_img * mix(0.12, 1.15, pow(a_g.y, 1.7));
-      float k = 0.9 + 1.8 * a_g.z;                         // 進むほど失速する、その強さ
-      vec2 pw = a_start + dir * sp * (1.0 - exp(-k * tp)) / k;
-      pw += vec2(-dir.y, dir.x) * sin(tp * (0.7 + a_r.z * 1.6) + ph) * u_img * 0.09 * (1.0 - exp(-tp));   // ふらふらと寄り道
-      pw.y -= u_img * (0.02 + 0.08 * a_g.z) * tp * tp;                                                   // 砂のように、少し落ちる
+      // --- 1) 霧になる：ハートの粒子が、それぞれの速さ・時刻で、息を吐くように画面へ広がる ---
+      vec2 F = a_f.xy;
+      float dF = length(F) / (length(u_res) * 0.5);
+      float a = clamp((u_t - (dF * 0.9 + a_r.x * 0.35 + a_g.x * 0.3)) / (1.3 + a_r.z * 0.8), 0.0, 1.0);
+      float ea = 1.0 - pow(1.0 - a, 2.4);
+      vec2 flow = vec2(sin(F.y * 0.005 + u_t * 0.6 + ph), cos(F.x * 0.005 + u_t * 0.5 + ph));
+      vec2 pf = mix(a_start, F, ea) + flow * sin(3.14159 * a) * u_img * (0.04 + 0.1 * a_g.y);
+      pf += vec2(sin(u_t * 1.3 + ph * 3.0), cos(u_t * 1.1 + ph * 2.0)) * 2.2 * smoothstep(0.6, 1.0, a);
 
-      // --- 迷ったあと、自分の気が向いた時に、居場所へ帰っていく ---
-      float tH = 0.5 + a_g.y * a_g.z * 0.5 + a_r.x * 1.3;
-      float dH = 0.9 + a_r.z * 0.8;
-      float l = clamp((tp - tH) / dH, 0.0, 1.0);
+      // --- 2) 霧の中から、上のほうから順に、色と形が立ち上がる（前線はゆるやかに波打つ） ---
+      float tb = u_t - (0.9 + a_uv.y * 1.6 + a_r.y * 0.45 + 0.18 * sin(a_uv.x * 8.0 + 1.0));
+      float l = clamp(tb / (1.5 + a_r.z * 0.7), 0.0, 1.0);
       float h = l * l * (3.0 - 2.0 * l);
       vec2 curl = vec2(sin(home.y * 0.006 + u_t * 0.8 + ph), cos(home.x * 0.006 + u_t * 0.7 + ph));
-      vec2 p = mix(pw, home, h) + curl * sin(3.14159 * l) * u_img * 0.05;
+      vec2 p = mix(pf, home, h) + curl * sin(3.14159 * l) * u_img * 0.07;
 
-      // --- 居場所についてから：粒それぞれが、蠢き、波打ち続ける ---
+      // --- 3) 形になってから：粒それぞれが、蠢き、波打ち続ける ---
       float s = smoothstep(0.85, 1.0, l);
       float br = sin(u_t * 0.85);
       vec2 wave = vec2(sin(home.y * 0.008 + u_t * 0.7 + ph * 0.3), cos(home.x * 0.008 - u_t * 0.6 + ph * 0.3)) * u_cell * 2.0
@@ -64,14 +60,14 @@
 
       gl_Position = vec4(p / (u_res * 0.5), 0.0, 1.0);
       float pulse = 1.0 + 0.25 * sin(u_t * 0.9 + ph + home.x * 0.008 - home.y * 0.005) * s;
-      float freeSize = 1.9 + 2.3 * a_g.z * a_g.x;
-      gl_PointSize = max(1.8, mix(freeSize, u_cell * 0.92 * pulse, h)) * u_dpr;
+      float fogSize = 1.9 + 1.5 * a_g.z;
+      gl_PointSize = max(1.8, mix(fogSize, u_cell * 0.92 * pulse, h)) * u_dpr;
 
-      // 漂う間、粒ごとに違う速さで色が移ろい、帰るにつれて絵の色へ
-      vec3 wander = mix(vec3(1.0), hue(fract(a_r.y * 3.0 + u_t * (0.15 + a_r.z * 0.6))), smoothstep(0.0, 0.6, tp) * 0.9);
-      float toImg = smoothstep(0.35, 1.0, l);
-      v_col = mix(wander, a_col.rgb, toImg) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
-      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.9, 1.0, h);
+      // 白（ハート）→ 灰白い霧 → 絵の色。色は、立ち上がりの前線とともに染まっていく
+      vec3 fog = vec3(0.84, 0.89, 0.92) * (0.9 + 0.1 * a_r.x);
+      vec3 c = mix(vec3(1.0), fog, smoothstep(0.0, 0.5, a));
+      v_col = mix(c, a_col.rgb, smoothstep(0.05, 0.95, l)) * (1.0 + 0.1 * sin(u_t * 0.9 + ph + home.x * 0.008) * s);
+      v_a = (u_t > 0.0 ? 1.0 : 0.0) * mix(0.88, 1.0, h);
     }`;
   const FS = `
     precision mediump float; varying vec3 v_col; varying float v_a;
@@ -143,9 +139,7 @@
       st[k * 2] = p[0] * hp; st[k * 2 + 1] = p[1] * hp;
       rr[k * 3] = Math.random(); rr[k * 3 + 1] = Math.random(); rr[k * 3 + 2] = Math.random();
       gg[k * 3] = Math.random(); gg[k * 3 + 1] = Math.random(); gg[k * 3 + 2] = Math.random();
-      // 崩れる順は、ばらばらの粒と、ところどころのまとまりの混ぜ合わせ
-      const nz = 0.5 + 0.25 * Math.sin(p[0] * 17 + 1.3) + 0.25 * Math.sin(p[1] * 21 - p[0] * 9 + 0.4);
-      ff[k * 3 + 2] = Math.pow(Math.min(1, Math.max(0, 0.65 * Math.random() + 0.35 * nz)), 1.4);
+      ff[k * 3] = (Math.random() - 0.5) * W * 1.06; ff[k * 3 + 1] = (Math.random() - 0.5) * H * 1.06;   // 霧の中での居場所
     }
     bufs.forEach((b) => gl.deleteBuffer(b)); bufs = [];
     function attr(name, data, size, type, norm) {
