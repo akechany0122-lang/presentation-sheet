@@ -340,7 +340,7 @@
 (function () {
   const btn = document.getElementById('navheart'), menu = document.getElementById('menu');
   const links = [...menu.querySelectorAll('li a')];
-  const sections = links.map((a) => document.querySelector(a.getAttribute('href')));
+  const sections = links.map((a) => { const h = a.getAttribute('href'); return h.charAt(0) === '#' ? document.querySelector(h) : null; });
   const setOpen = (open) => {
     document.body.classList.toggle('menu-open', open);
     btn.setAttribute('aria-expanded', String(open));
@@ -352,6 +352,7 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-open')) setOpen(false); });
   menu.addEventListener('click', (e) => { if (e.target === menu) setOpen(false); });
   links.forEach((a, i) => a.addEventListener('click', (e) => {
+    if (!sections[i]) { setOpen(false); return; }   // 作品のサイトへ（別のタブで開く）
     e.preventDefault();
     document.body.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true');
     const y = sections[i].getBoundingClientRect().top + window.scrollY - 40;
@@ -368,4 +369,18 @@
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+})();
+
+/* ================================================================
+   SOUND — 主役の映像の音を、ハートのスイッチで出す（初期状態は消音）
+================================================================ */
+(function () {
+  const btn = document.querySelector('.snd'), v = document.querySelector('.lead-film video');
+  if (!btn || !v) return;
+  btn.addEventListener('click', () => {
+    v.muted = !v.muted;
+    if (!v.muted) { v.volume = 0.9; v.play().catch(() => {}); }
+    btn.setAttribute('aria-pressed', String(!v.muted));
+    btn.setAttribute('aria-label', v.muted ? '音を出す' : '音を消す');
+  });
 })();

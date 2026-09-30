@@ -317,7 +317,7 @@ body.menu-open { overflow: hidden; }
 #menu a { display: flex; align-items: center; gap: 22px; text-decoration: none; color: var(--fg); padding: 9px 0; }
 #menu li a span { font-family: var(--serif); font-size: clamp(24px, 4.2vw, 50px); letter-spacing: 0.16em; line-height: 1.4; transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.4s; }
 #menu li a em { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--fg-faint); opacity: 0; transform: translateX(-8px); transition: opacity 0.4s, transform 0.5s; }
-#menu .hi { font-size: clamp(20px, 2.8vw, 34px); color: rgba(236,235,231,0.22); transition: color 0.4s, transform 0.5s cubic-bezier(.3,1.6,.4,1); }
+#menu .hi { font-size: clamp(20px, 2.8vw, 34px); color: rgba(236,235,231,0.42); transition: color 0.4s, transform 0.5s cubic-bezier(.3,1.6,.4,1); }
 #menu li a:hover .hi, #menu li a.now .hi { color: #fff; transform: scale(1.35); animation: nh-beat 0.9s ease-in-out infinite; }
 #menu li a:hover span { transform: translateX(10px); }
 #menu li a:hover em, #menu li a.now em { opacity: 1; transform: none; }
@@ -393,3 +393,57 @@ details.more summary::after { margin-left: auto; }
   #navheart, #navheart .hb, #menu li a .hi { animation: none !important; }
   #navheart { opacity: 1; }
 }
+
+/* ============================================================ 文字は小さく、余白を主役に ============================================================ */
+.sec-title { font-size: clamp(17px, 1.6vw, 22px); letter-spacing: 0.22em; margin-bottom: clamp(28px, 5vh, 48px); }
+.eyebrow { font-size: 10px; letter-spacing: 0.4em; margin-bottom: 22px; }
+.eyebrow .hi { font-size: 13px; }
+.lead { font-family: var(--serif); font-size: clamp(15px, 1.35vw, 18px); font-weight: 400; letter-spacing: 0.16em; line-height: 2.2; margin-bottom: 40px; }
+.chain { font-size: clamp(12px, 1.1vw, 14px); gap: 10px 14px; margin-bottom: 0; }
+.chain .hi { font-size: 11px; }
+.principle-card { padding: 30px 0; gap: 10px; }
+.principle-card .k { font-size: clamp(14px, 1.2vw, 16px); letter-spacing: 0.2em; }
+.principle-card .v { font-size: 12.5px; }
+.hs { font-size: 12px; gap: 7px; }
+.split { gap: clamp(56px, 10vw, 160px); }
+.flow-row { margin-bottom: clamp(120px, 20vh, 240px); gap: clamp(40px, 8vw, 128px); }
+.flow-row .txt h3 { font-size: clamp(14px, 1.3vw, 17px); letter-spacing: 0.22em; margin-bottom: 12px; }
+.flow-row .txt p { font-size: 12.5px; color: var(--fg-dim); }
+.hn { width: clamp(46px, 4.4vw, 60px); height: clamp(38px, 3.6vw, 49px); }
+.hn b { font-size: clamp(13px, 1.3vw, 17px); }
+.band .over h3 { font-size: clamp(15px, 1.8vw, 24px); letter-spacing: 0.2em; }
+.layers .t { font-size: clamp(13px, 1.2vw, 15px); }
+.layers p { font-size: 12px; }
+.group-label { font-size: clamp(13px, 1.15vw, 15px); letter-spacing: 0.22em; margin-bottom: clamp(24px, 4vh, 40px); }
+details.more summary { font-size: clamp(13px, 1.15vw, 15px); padding: 22px 0; }
+
+/* メニュー：小さな文字で、たっぷりの余白 */
+#menu { padding: 0 clamp(36px, 12vw, 220px); }
+#menu a { gap: 18px; padding: 15px 0; }
+#menu li a span { font-size: clamp(14px, 1.35vw, 18px); letter-spacing: 0.26em; }
+#menu li a em { font-size: 9.5px; letter-spacing: 0.3em; }
+#menu .hi { font-size: clamp(13px, 1.25vw, 16px); }
+#menu li a:hover span { transform: translateX(6px); }
+#menu li a:hover .hi, #menu li a.now .hi { transform: scale(1.3); }
+#menu li a.ext { margin-top: clamp(18px, 4vh, 40px); }
+body.menu-open #menu li:nth-child(4) { transition-delay: 0.34s; }
+
+/* 04 体験する */
+#experience { padding-bottom: clamp(80px, 14vh, 160px); }
+.exp { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.exp .sec-title { margin-bottom: clamp(56px, 10vh, 110px); }
+.exp-heart { display: flex; flex-direction: column; align-items: center; gap: 30px; text-decoration: none; color: var(--fg); }
+.exp-heart .hi { font-size: clamp(64px, 8vw, 104px); color: #fff; filter: drop-shadow(0 0 22px rgba(255,255,255,0.32)); animation: nh-breathe 4.4s ease-in-out infinite; transition: transform 0.6s cubic-bezier(.3,1.6,.4,1); }
+.exp-heart span { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.36em; color: var(--fg-dim); border-bottom: 1px solid var(--fg-faint); padding-bottom: 8px; transition: color 0.4s, border-color 0.4s; }
+.exp-heart:hover .hi { animation: nh-beat 0.8s ease-in-out infinite; }
+.exp-heart:hover span { color: #fff; border-color: #fff; }
+.footer-wordmark { margin-top: clamp(96px, 16vh, 180px); }
+.footer-meta { margin-top: 40px; }
+
+/* 主役の映像の、音のスイッチ（ハート） */
+.lead-film { position: relative; }
+.snd { position: absolute; right: clamp(16px, 3vw, 44px); bottom: clamp(16px, 3vw, 40px); z-index: 4; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border: 1px solid rgba(236,235,231,0.35); border-radius: 999px; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--fg); font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.3em; cursor: pointer; transition: background 0.4s, color 0.4s; }
+.snd .hi { font-size: 13px; color: rgba(236,235,231,0.45); transition: color 0.3s; }
+.snd:hover { background: rgba(0,0,0,0.6); }
+.snd[aria-pressed="true"] .hi { color: #fff; animation: nh-beat 1s ease-in-out infinite; }
+.snd[aria-pressed="true"] span::after { content: ' ON'; }

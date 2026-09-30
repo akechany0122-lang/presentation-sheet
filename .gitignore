@@ -1,5 +1,16 @@
 .DS_Store
 
-# 元の撮影データ・一時ファイルは載せない（Webで使う動画は assets/videos/ と assets/videos/web/ に置く）
+# 元の撮影データ・書き出し前の動画・編集ソフトの一時ファイルは載せない
+# （Webで使う軽量版の動画は assets/videos/ と assets/videos/web/ に置く。GitHubは1ファイル100MBまで）
 assets/videos/MVI_*
 assets/videos/.Lr*
+assets/videos/kokoronoseisei*
+assets/videos/*.aac
+assets/videos/*.md0
+assets/videos/*.m4v
+assets/Adobe*/
+assets/*.prproj
+assets/*.prin
+assets/*.prlock
+assets/*.prfpset
+assets/Adobe Premiere Pro*
