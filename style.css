@@ -202,19 +202,27 @@ ul.plain.dense { margin-top: 36px; }
 .process-row .found { color: var(--fg-dim); margin-top: 16px; }
 .process-row .lbl { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 4px; }
 
-/* 体験の記録：大きさの違う映像を、余白をもって散らす */
-.mosaic { display: grid; grid-template-columns: repeat(12, 1fr); gap: clamp(48px, 8vw, 112px) clamp(20px, 3vw, 48px); align-items: start; }
-.mosaic .film:nth-child(1) { grid-column: 1 / 8; }
-.mosaic .film:nth-child(2) { grid-column: 9 / 13; margin-top: clamp(40px, 12vh, 140px); }
-.mosaic .film:nth-child(3) { grid-column: 2 / 6; }
-.mosaic .film:nth-child(4) { grid-column: 7 / 13; margin-top: clamp(32px, 8vh, 96px); }
-.mosaic .film:nth-child(5) { grid-column: 1 / 6; }
-.mosaic .film:nth-child(6) { grid-column: 7 / 12; margin-top: clamp(32px, 10vh, 120px); }
-.mosaic .film:nth-child(7) { grid-column: 2 / 9; }
-.mosaic .film:nth-child(8) { grid-column: 10 / 13; --ratio: 9/16; margin-top: clamp(24px, 6vh, 64px); }
-.mosaic .film:nth-child(2) { --ratio: 4/5; }
-.mosaic .film:nth-child(3) { --ratio: 1/1; }
-.mosaic .film:nth-child(6) { --ratio: 4/3; }
+/* 主役の映像：ヒーローの直後に、画面いっぱいの大きさで */
+.lead-film { position: relative; z-index: 2; }
+.lead-film .film { margin: 0; }
+.lead-film .film .screen { aspect-ratio: 16/9; max-height: 100svh; width: 100%; }
+.lead-film .film figcaption { display: none; }
+
+/* 体験の記録：グループごとに、大きさも順序もばらばらの映像が、ゆっくり流れていく */
+.group { margin-top: clamp(72px, 12vh, 150px); }
+.group-label { font-family: var(--serif); font-size: clamp(16px, 1.7vw, 21px); letter-spacing: 0.18em; margin: 0 0 clamp(28px, 4.5vh, 48px); color: var(--fg); }
+.group-label b { font-family: var(--mono); font-weight: 300; font-size: 10.5px; letter-spacing: 0.3em; color: var(--fg-faint); margin-right: 1.4em; }
+.drift {
+  --h: clamp(150px, 27vh, 300px);
+  overflow: hidden; position: relative; margin-bottom: clamp(20px, 3vw, 40px);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+          mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.drift .track { display: flex; align-items: flex-start; gap: clamp(16px, 2.2vw, 36px); width: max-content; padding-bottom: calc(var(--h) * 0.26); animation: drift var(--dur, 120s) linear infinite; animation-direction: var(--dir, normal); }
+.drift:hover .track { animation-play-state: paused; }
+.drift .film { flex: none; }
+.drift .film .screen { aspect-ratio: auto; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ============================================================ FOOTER ============================================================ */
 #footer { position: relative; z-index: 2; padding: clamp(160px, 26vh, 300px) 0 72px; text-align: center; }
@@ -242,9 +250,6 @@ ul.plain.dense { margin-top: 36px; }
   .flow-row.rev .film { order: 0; }
   dl.spec, .layers { grid-template-columns: 1fr; }
   .about-film .screen, .band .screen { aspect-ratio: 16/10; }
-  .mosaic { grid-template-columns: 1fr; gap: 56px; }
-  .mosaic .film:nth-child(n) { grid-column: 1; margin-top: 0; }
-  .mosaic .film:nth-child(8) { --ratio: 16/9; }
   table.info th { width: 34%; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -252,4 +257,6 @@ ul.plain.dense { margin-top: 36px; }
   .hero-scroll .bar { animation: none; }
   .js .rv { opacity: 1; transform: none; transition: none; }
   .film video { transition: none; }
+  .drift { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  .drift .track { animation: none; }
 }

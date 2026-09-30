@@ -215,6 +215,45 @@
 })();
 
 /* ================================================================
+   DRIFT — グループごとの映像を、ランダムな順序・大きさ・高さで並べ、ゆっくり流す
+================================================================ */
+(function () {
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const RATIOS = [16 / 9, 16 / 9, 4 / 3, 21 / 9, 1, 3 / 2];
+  const build = (name) => {
+    const f = document.createElement('figure'); f.className = 'film';
+    const scr = document.createElement('div'); scr.className = 'screen';
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.poster = encodeURI('assets/videos/posters/' + name + '.jpg');
+    v.dataset.src = encodeURI('assets/videos/' + name + '.mp4');
+    scr.appendChild(v); f.appendChild(scr); return f;
+  };
+  function layout() {
+    document.querySelectorAll('.drift').forEach((d) => {
+      d.textContent = '';
+      const track = document.createElement('div'); track.className = 'track';
+      const H = Math.min(300, Math.max(150, window.innerHeight * 0.27));   // 列の高さ（CSSの --h と同じ）
+      const names = shuffle(d.dataset.clips.split(',').map((s) => s.trim()).filter(Boolean));
+      const items = names.map((n) => {
+        const f = build(n), r = RATIOS[(Math.random() * RATIOS.length) | 0], s = 0.7 + Math.random() * 0.3;
+        const scr = f.firstChild; scr.style.height = (H * s) + 'px'; scr.style.width = (H * s * r) + 'px';
+        f.style.marginTop = (Math.random() * H * 0.26) + 'px';
+        return f;
+      });
+      items.forEach((f) => track.appendChild(f));
+      items.forEach((f) => track.appendChild(f.cloneNode(true)));       // 切れ目なく流れるよう、同じ列をもう一組
+      d.appendChild(track);
+      const half = track.scrollWidth / 2;
+      track.style.setProperty('--dur', (half / (parseFloat(d.dataset.speed) || 30)).toFixed(1) + 's');
+      track.style.setProperty('--dir', d.dataset.dir === 'right' ? 'reverse' : 'normal');
+    });
+  }
+  layout();
+})();
+
+/* ================================================================
    FILM SLOTS — 画面に近づいたら読み込んで再生、離れたら止める。
    ファイルがない枠は、「配置してください」の表示のまま残る
 ================================================================ */
@@ -228,7 +267,7 @@
         v.play().catch(() => {});
       } else { v.pause(); }
     });
-  }, { rootMargin: '240px 0px' });
+  }, { rootMargin: '240px 320px' });
   films.forEach((v) => {
     v.addEventListener('loadeddata', () => { v.classList.add('on'); v.closest('.film').classList.add('live'); });
     v.addEventListener('error', () => { v.style.display = 'none'; });
