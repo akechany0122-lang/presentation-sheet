@@ -1,1 +1,6 @@
 .DS_Store
+
+# 元の撮影データ（数GBあり、GitHubには載せない）。Webで使う軽量版は assets/videos/web/ に置く
+assets/videos/*
+!assets/videos/web/
+!assets/videos/.gitkeep

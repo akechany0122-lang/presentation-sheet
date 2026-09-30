@@ -167,6 +167,7 @@
   const tStart = performance.now();
   let burstT = null, shown = false, heartGone = false;
   function begin() {
+    if (!hero.clientWidth || !hero.clientHeight) { setTimeout(begin, 200); return; }   // 非表示のタブなどで大きさが0のときは待つ
     build();
     let rt; window.addEventListener('resize', () => {
       clearTimeout(rt);
@@ -214,20 +215,24 @@
 })();
 
 /* ================================================================
-   VIDEO GALLERY — show the real footage when the file exists,
-   otherwise keep the placeholder frame (no broken-video icon)
+   FILM SLOTS — 画面に近づいたら読み込んで再生、離れたら止める。
+   ファイルがない枠は、「配置してください」の表示のまま残る
 ================================================================ */
 (function () {
-  document.querySelectorAll('.video-frame video').forEach((video) => {
-    const frame = video.closest('.video-frame');
-    const fallback = frame.querySelector('[data-fallback]');
-    video.addEventListener('loadeddata', () => {
-      fallback.style.display = 'none';
-      video.play().catch(() => {});
+  const films = document.querySelectorAll('.film video[data-src]');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      const v = e.target;
+      if (e.isIntersecting) {
+        if (!v.getAttribute('src')) v.setAttribute('src', v.dataset.src);
+        v.play().catch(() => {});
+      } else { v.pause(); }
     });
-    video.addEventListener('error', () => { video.style.display = 'none'; });
-    // try loading; if the source 404s the error/stalled event fires and the fallback stays visible
-    video.load();
+  }, { rootMargin: '240px 0px' });
+  films.forEach((v) => {
+    v.addEventListener('loadeddata', () => { v.classList.add('on'); v.closest('.film').classList.add('live'); });
+    v.addEventListener('error', () => { v.style.display = 'none'; });
+    io.observe(v);
   });
 })();
 
@@ -235,10 +240,9 @@
    REVEAL — 要素を、ゆっくりと現す
 ================================================================ */
 (function () {
-  const targets = document.querySelectorAll('.sec-grid > *, .interlude, #footer .wrap > *');
-  targets.forEach((el) => el.classList.add('reveal'));
+  const targets = document.querySelectorAll('.rv');
   const io = new IntersectionObserver((es) => {
     es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.04 });
   targets.forEach((el) => io.observe(el));
 })();

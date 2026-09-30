@@ -92,92 +92,129 @@ a { color: inherit; }
 }
 
 /* ============================================================ SECTIONS ============================================================ */
-section.block { position: relative; z-index: 2; padding: clamp(140px, 22vh, 260px) 0; }
+section.block { position: relative; z-index: 2; padding: clamp(120px, 20vh, 240px) 0; }
+.wrap.wide { max-width: 1440px; }
 
-/* 章：番号は左の余白に置き、本文は細い一本の列に */
-.sec-grid {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(0, var(--col)) minmax(0, 1fr);
-}
-.sec-grid > .sec-head { grid-column: 1 / 3; }
-.sec-grid > *:not(.sec-head) { grid-column: 2; }
-
-.sec-head { margin-bottom: clamp(56px, 9vh, 96px); display: flex; flex-direction: column; gap: 22px; }
-.sec-num { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.32em; color: var(--fg-faint); }
+/* 見出し */
+.eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.34em; color: var(--fg-faint); margin: 0 0 26px; }
 .sec-title {
-  font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.6vw, 28px);
-  letter-spacing: 0.16em; margin: 0; line-height: 1.7;
+  font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: 0.16em; margin: 0 0 clamp(36px, 6vh, 64px); line-height: 1.7;
 }
-.sec-lead { font-size: 15px; color: var(--fg); font-weight: 300; margin: 0 0 52px; }
-.sec-body p { font-size: 14px; color: var(--fg-dim); margin: 0 0 32px; }
-.sec-body strong, ul.plain strong { color: var(--fg); font-weight: 300; }
+.sec-title.big { font-size: clamp(30px, 4.6vw, 60px); letter-spacing: 0.12em; line-height: 1.55; }
+.lead { font-size: 15px; color: var(--fg); font-weight: 300; margin: 0 0 32px; max-width: 640px; }
+.body p { font-size: 14px; color: var(--fg-dim); margin: 0 0 28px; max-width: 640px; }
+.body strong, ul.plain strong { color: var(--fg); font-weight: 300; }
 code { font-family: var(--mono); font-size: 0.86em; color: var(--fg-dim); }
 
-/* ---- info table：壁面のキャプションのように ---- */
-table.info { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 28px; }
-table.info th, table.info td { text-align: left; padding: 22px 0; vertical-align: top; border-top: 1px solid var(--line-soft); }
-table.info tr:last-child th, table.info tr:last-child td { border-bottom: 1px solid var(--line-soft); }
-table.info th { width: 27%; padding-right: 24px; color: var(--fg-faint); font-weight: 300; font-size: 11.5px; letter-spacing: 0.16em; }
-table.info td { color: var(--fg-dim); line-height: 2; }
+/* ============================================================ 動画のスロット ============================================================ */
+/* <figure class="film" data-ratio="16/9"> … ratio は 16/9・4/3・1/1・9/16 などに変えるだけで、枠の形が変わる */
+.film { margin: 0; position: relative; }
+.film .screen { position: relative; aspect-ratio: var(--ratio, 16/9); background: #030303; overflow: hidden; }
+.film video, .film .fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.film video { background: transparent; opacity: 0; transition: opacity 1.4s ease; }
+.film video.on { opacity: 1; }
+.film .fallback {
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  color: var(--fg-faint); font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.22em; text-align: center; line-height: 2;
+  background: radial-gradient(ellipse at 50% 45%, rgba(236,235,231,0.05), transparent 70%), #050505;
+}
+.film .fallback .ring { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 9px; }
+.film figcaption { padding-top: 16px; font-size: 11.5px; letter-spacing: 0.14em; color: var(--fg-faint); line-height: 1.9; }
+.film figcaption b { font-weight: 300; color: var(--fg-dim); margin-right: 1em; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; }
+.film.bleed .screen { width: 100%; }
+.film.live .fallback { display: none; }
 
-/* ---- 五つの原則 ---- */
-.principle-grid { display: flex; flex-direction: column; margin-top: 8px; }
-.principle-card { padding: 44px 0; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 14px; }
+/* 作品概要：映像を画面いっぱいに */
+.about-film { margin-top: clamp(64px, 10vh, 120px); }
+.about-film .screen { aspect-ratio: 21/9; }
+.about-film figcaption { padding: 16px var(--gutter) 0; max-width: 1440px; margin: 0 auto; }
+
+/* 作品情報：壁面のラベルのように、細い列で並べる */
+dl.spec { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 clamp(24px, 4vw, 64px); margin: clamp(56px, 9vh, 96px) 0 0; }
+dl.spec > div { padding: 24px 0; border-top: 1px solid var(--line-soft); }
+dl.spec dt { font-size: 10.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 8px; font-family: var(--mono); }
+dl.spec dd { margin: 0; font-size: 13px; color: var(--fg-dim); line-height: 2; }
+
+/* コンセプト：見出しと、五つの原則を左右に */
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(48px, 8vw, 128px); align-items: start; }
+.split .sticky { position: sticky; top: 14vh; }
+.principle-grid { display: flex; flex-direction: column; }
+.principle-card { padding: 40px 0; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 12px; }
 .principle-card:last-child { border-bottom: 1px solid var(--line-soft); }
-.principle-card .k { font-family: var(--serif); font-size: 18px; letter-spacing: 0.18em; }
+.principle-card .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.3em; color: var(--fg-faint); }
+.principle-card .k { font-family: var(--serif); font-size: clamp(18px, 1.8vw, 22px); letter-spacing: 0.18em; }
 .principle-card .v { font-size: 13.5px; color: var(--fg-dim); }
 .principle-card .impl { font-size: 12px; color: var(--fg-faint); }
+.concept-film { margin-top: 56px; }
 
-/* ---- 体験の流れ ---- */
-.steps { display: flex; flex-direction: column; }
-.step { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 34px 0; border-top: 1px solid var(--line-soft); }
-.step:last-of-type { border-bottom: 1px solid var(--line-soft); }
-.step .n { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--fg-faint); padding-top: 6px; }
-.step .t { font-size: 14px; color: var(--fg-dim); }
-.step-note { margin-top: 44px; font-size: 12px; color: var(--fg-faint); }
+/* 体験の流れ：映像と言葉が交互に */
+.flow-row { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(32px, 6vw, 96px); align-items: center; margin-bottom: clamp(88px, 15vh, 180px); }
+.flow-row.rev { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
+.flow-row.rev .film { order: 2; }
+.flow-row .txt .n { font-family: var(--serif); font-size: clamp(40px, 6vw, 84px); font-weight: 400; color: rgba(236,235,231,0.16); line-height: 1; margin-bottom: 20px; letter-spacing: 0.04em; }
+.flow-row .txt h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(18px, 2vw, 24px); letter-spacing: 0.16em; margin: 0 0 18px; }
+.flow-row .txt p { font-size: 13.5px; color: var(--fg-dim); margin: 0; }
+.step-note { margin-top: 12px; font-size: 12px; color: var(--fg-faint); max-width: 640px; }
 
-/* ---- 図 ---- */
-.diagram-wrap { margin-top: 20px; }
+/* 粒子：映像に文字を重ねる */
+.band { position: relative; margin-top: 0; }
+.band .screen { aspect-ratio: 21/9; }
+.band .over { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(28px, 6vh, 64px); z-index: 2; pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,0.78), transparent); padding-top: 120px; }
+.band .over h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 3.2vw, 44px); letter-spacing: 0.14em; margin: 0 0 12px; line-height: 1.6; }
+.band .over p { margin: 0; font-size: 13px; color: var(--fg-dim); max-width: 560px; }
+.layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(24px, 4vw, 64px); margin-top: clamp(56px, 9vh, 96px); }
+.layers > div { border-top: 1px solid var(--line-soft); padding-top: 24px; }
+.layers .t { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 10px; }
+.layers p { margin: 0; font-size: 13px; color: var(--fg-dim); line-height: 2; }
+
+/* 図 */
+.diagram-wrap { margin-top: 8px; }
 .diagram-wrap svg { width: 100%; height: auto; display: block; }
-.diagram-caption { margin-top: 32px; font-size: 12px; color: var(--fg-faint); }
+.diagram-caption { margin-top: 28px; font-size: 12px; color: var(--fg-faint); }
 
-/* ---- リスト ---- */
-ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+/* 詳細（開閉） */
+details.more { border-top: 1px solid var(--line-soft); }
+details.more:last-of-type { border-bottom: 1px solid var(--line-soft); }
+details.more summary { list-style: none; cursor: pointer; padding: 28px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 24px; font-family: var(--serif); font-size: clamp(16px, 1.6vw, 19px); letter-spacing: 0.16em; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::after { content: '+'; font-family: var(--mono); font-size: 16px; color: var(--fg-faint); transition: transform 0.5s ease; }
+details.more[open] summary::after { transform: rotate(45deg); }
+details.more .in { padding: 4px 0 44px; max-width: 760px; }
+table.info { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+table.info th, table.info td { text-align: left; padding: 18px 0; vertical-align: top; border-top: 1px solid var(--line-soft); }
+table.info th { width: 26%; padding-right: 24px; color: var(--fg-faint); font-weight: 300; font-size: 11.5px; letter-spacing: 0.16em; }
+table.info td { color: var(--fg-dim); line-height: 2; }
+ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
 ul.plain li { position: relative; padding-left: 26px; font-size: 13.5px; color: var(--fg-dim); }
 ul.plain li::before { content: ''; position: absolute; left: 0; top: 1.25em; width: 10px; height: 1px; background: var(--fg-faint); }
-ul.plain.dense { margin-top: 44px; }
-
-/* ---- code ---- */
-.codebox { border-left: 1px solid var(--line); padding: 8px 0 8px 28px; margin: 32px 0 56px; overflow-x: auto; }
+ul.plain.dense { margin-top: 36px; }
+.codebox { border-left: 1px solid var(--line); padding: 8px 0 8px 28px; margin: 32px 0 40px; overflow-x: auto; }
 .codebox code { font-size: 12px; line-height: 2; color: var(--fg-dim); white-space: pre-wrap; word-break: break-word; }
-.note { font-size: 12px; color: var(--fg-faint); margin: 44px 0 0; }
+.note { font-size: 12px; color: var(--fg-faint); margin: 36px 0 0; }
 
-/* ---- 制作プロセス ---- */
-.process-row { display: grid; grid-template-columns: 36px 1fr; gap: 0 12px; padding: 38px 0; border-top: 1px solid var(--line-soft); font-size: 13.5px; }
+/* 制作プロセス */
+.process-row { display: grid; grid-template-columns: 36px 1fr; gap: 0 12px; padding: 36px 0; border-top: 1px solid var(--line-soft); font-size: 13.5px; }
 .process-row:last-child { border-bottom: 1px solid var(--line-soft); }
 .process-row .idx { grid-row: 1 / 3; font-family: var(--mono); font-size: 11px; color: var(--fg-faint); padding-top: 6px; }
 .process-row .tried { color: var(--fg); }
-.process-row .found { color: var(--fg-dim); margin-top: 18px; }
+.process-row .found { color: var(--fg-dim); margin-top: 16px; }
 .process-row .lbl { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; color: var(--fg-faint); margin-bottom: 4px; }
 
-/* ============================================================ 動画 ============================================================ */
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(40px, 6vw, 88px) clamp(28px, 4vw, 56px); margin-top: 8px; }
-.video-frame { position: relative; }
-.video-frame .screen { position: relative; aspect-ratio: 16 / 10; background: #000; overflow: hidden; }
-.video-frame video, .video-frame .fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.video-frame .fallback {
-  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-  background: #040404; color: var(--fg-faint);
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; text-align: center; line-height: 2;
-}
-.video-frame .fallback .ring { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--fg-faint); }
-.video-frame .cap { padding-top: 18px; font-size: 11.5px; letter-spacing: 0.12em; color: var(--fg-faint); line-height: 1.9; }
-
-table.caption-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
-table.caption-table th, table.caption-table td { text-align: left; padding: 20px 0; border-top: 1px solid var(--line-soft); }
-table.caption-table tr:last-child th, table.caption-table tr:last-child td { border-bottom: 1px solid var(--line-soft); }
-table.caption-table th { width: 27%; color: var(--fg-faint); font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.16em; font-weight: 300; }
-table.caption-table td { color: var(--fg-dim); }
+/* 体験の記録：大きさの違う映像を、余白をもって散らす */
+.mosaic { display: grid; grid-template-columns: repeat(12, 1fr); gap: clamp(48px, 8vw, 112px) clamp(20px, 3vw, 48px); align-items: start; }
+.mosaic .film:nth-child(1) { grid-column: 1 / 8; }
+.mosaic .film:nth-child(2) { grid-column: 9 / 13; margin-top: clamp(40px, 12vh, 140px); }
+.mosaic .film:nth-child(3) { grid-column: 2 / 6; }
+.mosaic .film:nth-child(4) { grid-column: 7 / 13; margin-top: clamp(32px, 8vh, 96px); }
+.mosaic .film:nth-child(5) { grid-column: 1 / 6; }
+.mosaic .film:nth-child(6) { grid-column: 7 / 12; margin-top: clamp(32px, 10vh, 120px); }
+.mosaic .film:nth-child(7) { grid-column: 2 / 9; }
+.mosaic .film:nth-child(8) { grid-column: 10 / 13; --ratio: 9/16; margin-top: clamp(24px, 6vh, 64px); }
+.mosaic .film:nth-child(2) { --ratio: 4/5; }
+.mosaic .film:nth-child(3) { --ratio: 1/1; }
+.mosaic .film:nth-child(6) { --ratio: 4/3; }
 
 /* ============================================================ FOOTER ============================================================ */
 #footer { position: relative; z-index: 2; padding: clamp(160px, 26vh, 300px) 0 72px; text-align: center; }
@@ -195,19 +232,24 @@ table.caption-table td { color: var(--fg-dim); }
 .footer-meta { margin-top: 56px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--fg-faint); display: flex; flex-direction: column; gap: 8px; }
 
 /* ============================================================ ゆっくり現れる ============================================================ */
-.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity 2s cubic-bezier(.2,.6,.2,1), transform 2s cubic-bezier(.2,.6,.2,1); }
-.js .reveal.in { opacity: 1; transform: none; }
+.js .rv { opacity: 0; transform: translateY(14px); transition: opacity 1.8s cubic-bezier(.2,.6,.2,1), transform 1.8s cubic-bezier(.2,.6,.2,1); }
+.js .rv.in { opacity: 1; transform: none; }
 
 /* ============================================================ RESPONSIVE ============================================================ */
-@media (max-width: 760px) {
-  .sec-grid { grid-template-columns: 1fr; }
-  .sec-grid > .sec-head, .sec-grid > *:not(.sec-head) { grid-column: 1; }
-  table.info th, table.caption-table th { width: 34%; }
-  .step { grid-template-columns: 44px 1fr; }
+@media (max-width: 860px) {
+  .split, .flow-row, .flow-row.rev { grid-template-columns: 1fr; }
+  .split .sticky { position: static; }
+  .flow-row.rev .film { order: 0; }
+  dl.spec, .layers { grid-template-columns: 1fr; }
+  .about-film .screen, .band .screen { aspect-ratio: 16/10; }
+  .mosaic { grid-template-columns: 1fr; gap: 56px; }
+  .mosaic .film:nth-child(n) { grid-column: 1; margin-top: 0; }
+  .mosaic .film:nth-child(8) { --ratio: 16/9; }
+  table.info th { width: 34%; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-scroll .bar { animation: none; }
-  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .rv { opacity: 1; transform: none; transition: none; }
+  .film video { transition: none; }
 }
