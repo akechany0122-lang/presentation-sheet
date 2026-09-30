@@ -11,19 +11,23 @@
   const heartEl = document.getElementById('hero-heart');
   const auraEl = document.getElementById('hero-aura');
   const markEl = document.getElementById('hero-mark');
+  const stage = document.getElementById('stage');
+  const loaderEl = document.getElementById('hero-loader');
+  const ringBar = loaderEl.querySelector('.bar');
+  const pctEl = document.getElementById('hero-ldpct');
   const scrollHint = document.getElementById('hero-scroll');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function showFinal() { markEl.classList.add('show'); scrollHint.classList.add('show'); }
 
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
-  if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); window.dispatchEvent(new Event('hero-done')); return; }
+  if (!gl) { heartEl.style.display = auraEl.style.display = loaderEl.style.display = 'none'; showFinal(); window.dispatchEvent(new Event('hero-done')); return; }
 
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
   // 参考映像の変容：ハートの白い粒子が、霧のように画面へ広がり、
   // その霧の中から、上のほうから順に色と形が立ち上がってビジュアルになる
   const DONE_PT = 4.2;         // 崩れはじめから、ロゴが現れるまで
-  const EXTRA = 0.45;          // 画面の下にはみ出して敷く粒子（スクロール時に、切れ目なく黒へ溶ける）
+  const EXTRA = 0;             // （画面の下へはみ出す粒子は使わない。スクロール中は最初の画面が留まり、黒へ溶ける）
 
   const VS = `
     attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f; attribute vec3 a_g;
@@ -92,9 +96,27 @@
   const motif = new Image(), heartImg = heartEl;   // ハートは、HTMLに埋め込んだ軽い画像をそのまま使う
   let loaded = 0, ready = false;
   function onLoad() { if (++loaded === 2) begin(); }
-  motif.onload = onLoad;
-  motif.src = 'assets/motif_base.webp';
+  motif.onload = () => { target = 1; onLoad(); };
   if (heartImg.complete && heartImg.naturalWidth) onLoad(); else heartImg.onload = onLoad;
+
+  // 読み込みの進み具合（0〜1）。ハートを囲む輪と、% の表示に使う
+  let target = 0, shownPct = 0;
+  const MOTIF = 'assets/motif_base.webp';
+  (function loadMotif() {
+    const fallback = () => { motif.src = MOTIF; };
+    if (!window.fetch || !window.ReadableStream) { fallback(); return; }
+    fetch(MOTIF).then(async (res) => {
+      if (!res.ok || !res.body) throw new Error('bad');
+      const total = +res.headers.get('content-length') || 0;
+      const reader = res.body.getReader(), chunks = []; let got = 0;
+      for (;;) {
+        const r = await reader.read(); if (r.done) break;
+        chunks.push(r.value); got += r.value.length;
+        target = Math.max(target, total ? 0.94 * got / total : Math.min(0.9, target + 0.12));
+      }
+      motif.src = URL.createObjectURL(new Blob(chunks, { type: 'image/webp' }));
+    }).catch(fallback);
+  })();
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   let W = 0, H = 0, H0 = 0, count = 0, cell = 3, bufs = [];
@@ -179,11 +201,30 @@
   }
   if (reduced) { heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
 
+  // 最初の画面は、スクロールのあいだ留まりながら、ゆっくり黒へ溶ける
+  function fadeHero() {
+    const R = Math.max(1, stage.offsetHeight - hero.clientHeight);
+    const k = Math.min(Math.max((window.scrollY - 0.1 * R) / (0.88 * R), 0), 1);
+    hero.style.opacity = (1 - k * k * (3 - 2 * k)).toFixed(3);
+  }
+  window.addEventListener('scroll', fadeHero, { passive: true });
+
   // ゆっくり滑らかに：0→1→0（両端で速度ゼロ）
   const breathe = (x) => 0.5 - 0.5 * Math.cos(Math.PI * 2 * x);
 
   function frame(now) {
     const t = (now - tStart) / 1000;
+    // 読み込み中の輪：実際の進み具合に、なめらかに追従
+    if (!loaderEl.classList.contains('gone')) {
+      shownPct += (target - shownPct) * (ready ? 0.4 : 0.16);
+      if (shownPct > 0.005) loaderEl.classList.add('det');
+      ringBar.style.strokeDashoffset = (100 - 100 * shownPct).toFixed(2);
+      pctEl.textContent = Math.min(100, Math.round(shownPct * 100));
+      if (burstT !== null && shownPct > 0.985) { pctEl.textContent = 100; ringBar.style.strokeDashoffset = 0; }
+      if (burstT !== null && ((t >= burstT - 0.45 && shownPct > 0.97) || t >= burstT - 0.05)) loaderEl.classList.add('gone');
+    }
+    const R = Math.max(1, stage.offsetHeight - hero.clientHeight), sy = window.scrollY;
+    fadeHero();
     if (!heartGone && !reduced) {
       if (burstT === null || t < burstT) {
         const b = breathe((t % BREATH) / BREATH);
@@ -201,7 +242,7 @@
         if (k >= 1) { heartGone = true; heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
       }
     }
-    if (burstT !== null && window.scrollY < H0 * 1.5) {   // 画面外では描かない
+    if (burstT !== null && sy < H0 + R) {   // 画面外では描かない
       const pt = t - burstT;
       gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform2f(uRes, W, H); gl.uniform1f(uT, pt > 0 ? pt : -1); gl.uniform1f(uDpr, DPR);

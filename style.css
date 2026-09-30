@@ -37,16 +37,28 @@ a { color: inherit; }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
 
 /* ============================================================ HERO ============================================================ */
+/* 最初の画面は、スクロールしてもしばらく画面に留まり（sticky）、そのあいだにゆっくり黒へ溶ける。
+   溶けきったところで、はじめて説明や映像が下から流れてくる */
+#stage { position: relative; z-index: 2; height: calc(100svh + var(--runway, 90vh)); }
 #hero {
   --heart: clamp(90px, 17vmin, 150px);
-  position: relative; z-index: 2; height: 100svh; min-height: 560px;
+  position: sticky; top: 0; z-index: 2; height: 100svh; min-height: 560px; overflow: hidden;
 }
-/* 粒子は最初の1画面より下へ45%はみ出して敷き、スクロールすると、その部分が滑らかに黒へ溶ける（切れ目なし） */
-#bg-canvas {
-  position: absolute; left: 0; top: 0; width: 100%; height: 145%; z-index: 1; display: block; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 68.9%, rgba(0,0,0,0.62) 72.5%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.06) 80%, transparent 84%);
-          mask-image: linear-gradient(to bottom, #000 0, #000 68.9%, rgba(0,0,0,0.62) 72.5%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.06) 80%, transparent 84%);
-}
+#bg-canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; display: block; pointer-events: none; }
+
+/* 読み込み中：ハートを囲む輪が、実際の読み込みに合わせて満ちていく */
+#hero-loader { position: absolute; left: 50%; top: 50%; z-index: 3; width: calc(var(--heart) * 2.05); aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; transition: opacity 0.7s ease; }
+#hero-loader.gone { opacity: 0; }
+#hero-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+#hero-ring circle { fill: none; stroke-linecap: round; }
+#hero-ring .trk { stroke: rgba(255,255,255,0.14); stroke-width: 0.7; }
+#hero-ring .bar { stroke: rgba(255,255,255,0.9); stroke-width: 1.1; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 0 2px rgba(255,255,255,0.6)); }
+#hero-loader.ld:not(.det) #hero-ring { animation: ldspin 1.6s linear infinite; }
+#hero-loader.ld:not(.det) #hero-ring .bar { stroke-dashoffset: 78; }
+@keyframes ldspin { to { transform: rotate(270deg); } }
+#hero-ldtxt { position: absolute; left: 0; right: 0; top: calc(100% + 18px); display: flex; justify-content: center; align-items: baseline; gap: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.4em; color: rgba(236,235,231,0.7); }
+#hero-ldtxt b { font-weight: 300; min-width: 3ch; text-align: right; letter-spacing: 0.1em; }
+#hero-ldtxt b::after { content: '%'; opacity: 0.6; margin-left: 1px; }
 
 /* 呼吸するハートと、その周りのオーラ */
 #hero-aura {
@@ -252,7 +264,7 @@ ul.plain.dense { margin-top: 36px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hero-scroll .bar { animation: none; }
+  .hero-scroll .bar, #hero-loader { animation: none; }
   .js .rv { opacity: 1; transform: none; transition: none; }
   .film video { transition: none; }
   .drift { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
