@@ -482,3 +482,29 @@ h1, h2, h3, .sec-title, .lead, .principle-card .k, .hn b, #menu li a span, .chai
 .mtxt h3 { margin: 0; }
 .mtxt p { flex: 1 1 260px; }
 @media (max-width: 860px) { .mtxt { gap: 14px 18px; } }
+
+
+/* ============================================================ セイセイノシクミ：左に言葉、右に映像（四つとも同じ形） ============================================================ */
+.mech { display: grid; grid-template-columns: minmax(220px, 1fr) 3fr; gap: clamp(32px, 6vw, 100px); align-items: start; margin-bottom: clamp(88px, 14vh, 170px); }
+.mtxt { display: block; position: sticky; top: 16vh; margin: 0; }
+.mtxt .hn { margin: 0 0 24px; display: inline-flex; }
+.mtxt h3 { margin: 0 0 14px; }
+.mtxt p { flex: none; }
+.mplay { position: relative; }
+.mplay .film .screen { aspect-ratio: 16 / 9; }
+.mplay .film figcaption { display: none; }
+.dots { display: flex; gap: 12px; margin-top: 18px; }
+.dots button { appearance: none; border: 0; background: transparent; padding: 4px; cursor: pointer; font-size: 14px; color: rgba(236,235,231,0.24); transition: color 0.4s, transform 0.4s cubic-bezier(.3,1.6,.4,1); }
+.dots button:hover { color: rgba(236,235,231,0.7); transform: scale(1.2); }
+.dots button.on { color: #fff; }
+.dots button.on .hi { filter: drop-shadow(0 0 6px rgba(255,255,255,0.5)); }
+@media (max-width: 860px) { .mech { grid-template-columns: 1fr; gap: 26px; } .mtxt { position: static; } }
+
+/* ============================================================ インスタレーション：カーソルを合わせると、その映像が前に出る ============================================================ */
+#installation .film { position: relative; z-index: 1; }
+#installation .film.rv.in { transition: transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.5s ease, filter 0.5s ease, box-shadow 0.6s ease; }
+#installation.picking .film:not(.picked) { opacity: 0.2; filter: grayscale(0.6) blur(1.5px); }
+#installation .wall .film.picked { transform: scale(1.9); z-index: 20; box-shadow: 0 30px 120px rgba(0,0,0,0.85); }
+#installation .feature .film.picked { transform: scale(1.1); z-index: 20; box-shadow: 0 30px 120px rgba(0,0,0,0.85); }
+#installation .film { cursor: pointer; }
+@media (max-width: 860px) { #installation .wall .film.picked { transform: scale(1.5); } }

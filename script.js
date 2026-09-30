@@ -248,113 +248,143 @@
 
 /* ================================================================
    FILMS — 名前の一覧から、映像の枠を組み立てる
-   ・data-pool + data-count … 一覧からランダムに count 本を選ぶ（ヘンカ）
-   ・data-clips …………………… 一覧を、すべて、ランダムな順序で並べる（壁）
+   ・.mplay[data-list]  … 一覧の映像を、一本ずつ、順に流す（スキャン、ウゴク、セイセイ）
+   ・.mplay[data-pool]  … 一覧からランダムに count 本を選び、一本ずつ順に流す（ヘンカ）
+   ・.wall[data-clips]  … 一覧のすべてを、ランダムな順序で、小さく並べる（インスタレーション）
 ================================================================ */
 (function () {
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const build = (name) => {
-    const f = document.createElement('figure'); f.className = 'film rv';
+  const list = (s) => s.split(',').map((x) => x.trim()).filter(Boolean);
+  const url = (dir, n) => encodeURI('assets/videos/' + dir + n + '.mp4');
+  const poster = (n) => encodeURI('assets/videos/posters/' + n + '.jpg');
+  const film = (n, dir, extra) => {
+    const f = document.createElement('figure'); f.className = 'film ' + (extra || '');
     const scr = document.createElement('div'); scr.className = 'screen';
     const v = document.createElement('video');
     v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-    v.dataset.poster = encodeURI('assets/videos/posters/' + name + '.jpg');
-    v.dataset.src = encodeURI('assets/videos/' + name + '.mp4');
-    scr.appendChild(v); f.appendChild(scr); return f;
+    v.dataset.poster = poster(n); v.dataset.src = url(dir, n);
+    scr.appendChild(v); f.appendChild(scr); return { f, v };
   };
-  const list = (s) => s.split(',').map((x) => x.trim()).filter(Boolean);
-  document.querySelectorAll('[data-pool]').forEach((el) => {
-    shuffle(list(el.dataset.pool)).slice(0, +el.dataset.count || 3).forEach((n) => el.appendChild(build(n)));
+
+  // 一本ずつ順に流す枠（映像が終わると、次の映像へ。下のハートで、選ぶこともできる）
+  document.querySelectorAll('.mplay').forEach((el) => {
+    const names = el.dataset.pool ? shuffle(list(el.dataset.pool)).slice(0, +el.dataset.count || 4) : list(el.dataset.list);
+    const { f, v } = film(names[0], 'lite/', 'rv');
+    el.appendChild(f);
+    if (names.length < 2) return;
+    v.loop = false;
+    const dots = document.createElement('div'); dots.className = 'dots';
+    const hs = names.map((n, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', (i + 1) + '本目');
+      b.innerHTML = '<i class="hi"></i>'; dots.appendChild(b); return b;
+    });
+    el.appendChild(dots);
+    let cur = 0;
+    const show = (i) => {
+      cur = (i + names.length) % names.length;
+      hs.forEach((b, k) => b.classList.toggle('on', k === cur));
+      v.classList.remove('on');
+      setTimeout(() => {
+        v.dataset.cur = url('lite/', names[cur]); v.poster = poster(names[cur]);
+        v.src = v.dataset.cur; v.load(); v.play().catch(() => {});
+      }, 380);
+    };
+    hs[0].classList.add('on');
+    v.addEventListener('ended', () => show(cur + 1));
+    hs.forEach((b, i) => b.addEventListener('click', () => { if (i !== cur) show(i); }));
   });
+
+  // 壁：小さく、たくさん
   document.querySelectorAll('[data-clips]').forEach((el) => {
-    shuffle(list(el.dataset.clips)).forEach((n) => el.appendChild(build(n)));
+    shuffle(list(el.dataset.clips)).forEach((n) => el.appendChild(film(n, 'lite/s/', 'rv').f));
   });
 })();
 
 /* ================================================================
    FILM SLOTS — 画面に近づいたら読み込んで再生、離れたら止める。
-   冒頭の演出（ハート→粒子）が終わるまで（またはスクロールするまで）は、
-   大きな映像を読み込まない。演出に回線とCPUを譲る
+   ・冒頭の演出（ハート→粒子）が終わるまで（またはスクロールするまで）は、映像を読み込まない
+   ・同時に読み込むのは3本まで。失敗したら、少し待って、やり直す
 ================================================================ */
 (function () {
-  let go = false;
-  const waiting = new Set();
-  const start = (v) => {
+  let go = false, active = 0;
+  const MAX = 3, waiting = new Set(), queue = [];
+  const srcOf = (v) => v.dataset.cur || v.dataset.src;
+  const attach = (v) => {
     if (v.dataset.poster && !v.poster) v.poster = v.dataset.poster;
-    if (!v.getAttribute('src')) v.setAttribute('src', v.dataset.src);
+    if (!v.getAttribute('src')) v.setAttribute('src', srcOf(v));
     v.play().catch(() => {});
+  };
+  const pump = () => {
+    while (active < MAX && queue.length) {
+      const v = queue.shift();
+      if (!v._want || v.getAttribute('src')) { if (v._want) v.play().catch(() => {}); continue; }
+      active++;
+      let done = false;
+      const fin = () => { if (done) return; done = true; active--; pump(); };
+      v.addEventListener('loadeddata', fin, { once: true });
+      v.addEventListener('error', fin, { once: true });
+      setTimeout(fin, 7000);
+      attach(v);
+    }
+  };
+  const want = (v) => {
+    v._want = true;
+    if (v.getAttribute('src')) { v.play().catch(() => {}); return; }
+    if (!go) { waiting.add(v); return; }
+    if (!queue.includes(v)) queue.push(v);
+    pump();
   };
   const open = () => {
     if (go) return; go = true;
-    waiting.forEach(start); waiting.clear();
+    waiting.forEach((v) => { if (v._want && !queue.includes(v)) queue.push(v); }); waiting.clear(); pump();
   };
   window.addEventListener('hero-done', open);
   window.addEventListener('scroll', () => { if (window.scrollY > 12) open(); }, { passive: true });
-  setTimeout(open, 12000);   // 何かの理由で演出が終わらなくても、いずれ開く
+  setTimeout(open, 12000);
 
-  const films = document.querySelectorAll('.film video[data-src]');
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       const v = e.target;
-      if (e.isIntersecting) { if (go) start(v); else waiting.add(v); }
-      else { waiting.delete(v); v.pause(); }
+      if (e.isIntersecting) want(v); else { v._want = false; waiting.delete(v); v.pause(); }
     });
-  }, { rootMargin: '240px 320px' });
-  films.forEach((v) => {
+  }, { rootMargin: '200px 200px' });
+
+  document.querySelectorAll('.film video[data-src]').forEach((v) => {
     v.addEventListener('loadeddata', () => { v.classList.add('on'); v.closest('.film').classList.add('live'); });
-    v.addEventListener('error', () => { v.style.display = 'none'; });
+    v.addEventListener('error', () => {                     // 通信の一時的な失敗は、やり直す
+      v._retry = (v._retry || 0) + 1;
+      if (v._retry > 4) { v.style.display = 'none'; return; }
+      setTimeout(() => { v.setAttribute('src', srcOf(v)); v.load(); if (v._want) v.play().catch(() => {}); }, 1200 * v._retry);
+    });
     io.observe(v);
   });
 })();
 
 /* ================================================================
-   REVEAL — 要素を、ゆっくりと現す
-================================================================ */
+   PICK UP — インスタレーション：カーソルを合わせた映像が、ぐっと前に出る
+   ================================================================ */
 (function () {
-  const targets = document.querySelectorAll('.rv');
-  const io = new IntersectionObserver((es) => {
-    es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.04 });
-  targets.forEach((el) => io.observe(el));
-})();
-
-/* ================================================================
-   HEART MENU — 左上のハートを押すと、要所へ飛べるメニューが開く。
-   ハートは、スクロールに合わせて、下から満ちていく
-================================================================ */
-(function () {
-  const btn = document.getElementById('navheart'), menu = document.getElementById('menu');
-  const links = [...menu.querySelectorAll('li a')];
-  const sections = links.map((a) => { const h = a.getAttribute('href'); return h.charAt(0) === '#' ? document.querySelector(h) : null; });
-  const setOpen = (open) => {
-    document.body.classList.toggle('menu-open', open);
-    btn.setAttribute('aria-expanded', String(open));
-    btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
-    menu.setAttribute('aria-hidden', String(!open));
-    if (open) links[0].focus({ preventScroll: true }); else btn.focus({ preventScroll: true });
+  const root = document.getElementById('installation');
+  if (!root) return;
+  let cur = null;
+  const origin = (f) => {                                     // 端の映像は、外へはみ出さないように、内側へ広がる
+    const b = f.getBoundingClientRect(), W = window.innerWidth;
+    const x = (b.left + b.width / 2) / W;
+    f.style.transformOrigin = (x < 0.3 ? 'left' : x > 0.7 ? 'right' : 'center') + ' center';
   };
-  btn.addEventListener('click', () => setOpen(!document.body.classList.contains('menu-open')));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-open')) setOpen(false); });
-  menu.addEventListener('click', (e) => { if (e.target === menu) setOpen(false); });
-  links.forEach((a, i) => a.addEventListener('click', (e) => {
-    if (!sections[i]) { setOpen(false); return; }   // 作品のサイトへ（別のタブで開く）
-    e.preventDefault();
-    document.body.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true');
-    const y = sections[i].getBoundingClientRect().top + window.scrollY - 40;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  }));
-
-  // いま居る章の印、と、ハートの満ち具合
-  function onScroll() {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    btn.style.setProperty('--p', (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0).toFixed(1) + '%');
-    let cur = -1;
-    sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.45) cur = i; });
-    links.forEach((a, i) => a.classList.toggle('now', i === cur));
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  const pick = (f) => {
+    if (cur === f) return;
+    if (cur) cur.classList.remove('picked');
+    cur = f; origin(f); f.classList.add('picked'); root.classList.add('picking');
+    const v = f.querySelector('video'); if (v && v.getAttribute('src')) v.play().catch(() => {});
+  };
+  const unpick = () => { if (cur) cur.classList.remove('picked'); cur = null; root.classList.remove('picking'); };
+  root.querySelectorAll('.film').forEach((f) => {
+    f.addEventListener('mouseenter', () => pick(f));
+    f.addEventListener('mouseleave', unpick);
+    f.addEventListener('click', () => { if (window.matchMedia('(hover: none)').matches) { cur === f ? unpick() : pick(f); } });
+  });
 })();
 
 /* ================================================================

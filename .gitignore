@@ -1,8 +1,10 @@
 .DS_Store
 
-# 元の撮影データ・書き出し前の動画・編集ソフトの一時ファイルは載せない
-# （Webで使う軽量版の動画は assets/videos/ と assets/videos/web/ に置く。GitHubは1ファイル100MBまで）
-assets/videos/MVI_*
+# 元の撮影データ・書き出し前の動画・編集ソフトの一時ファイルは載せない。
+# Webで使う軽くした動画（assets/videos/lite/ と kokoro-movie.mp4）だけを載せる。GitHubは1ファイル100MBまで。
+assets/videos/*.mp4
+!assets/videos/kokoro-movie.mp4
+assets/videos/*.sb-*
 assets/videos/.Lr*
 assets/videos/kokoronoseisei*
 assets/videos/*.aac
