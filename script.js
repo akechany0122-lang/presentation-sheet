@@ -17,7 +17,7 @@
   function showFinal() { markEl.classList.add('show'); scrollHint.classList.add('show'); }
 
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
-  if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); return; }
+  if (!gl) { heartEl.style.display = auraEl.style.display = 'none'; showFinal(); window.dispatchEvent(new Event('hero-done')); return; }
 
   const BREATH = 2.0;       // ハートが呼吸する秒数（1呼吸）
   // 参考映像の変容：ハートの白い粒子が、霧のように画面へ広がり、
@@ -207,7 +207,7 @@
       gl.uniform2f(uRes, W, H); gl.uniform1f(uT, pt > 0 ? pt : -1); gl.uniform1f(uDpr, DPR);
       gl.uniform1f(uImg, Math.min(W, H0)); gl.uniform1f(uCell, cell); gl.uniform2f(uHc, 0, (H - H0) / 2);
       if (pt > 0) gl.drawArrays(gl.POINTS, 0, count);
-      if (!shown && pt >= DONE_PT) { shown = true; showFinal(); }
+      if (!shown && pt >= DONE_PT) { shown = true; showFinal(); window.dispatchEvent(new Event('hero-done')); }
     }
     requestAnimationFrame(frame);
   }
@@ -226,7 +226,7 @@
     const v = document.createElement('video');
     v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
     v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-    v.poster = encodeURI('assets/videos/posters/' + name + '.jpg');
+    v.dataset.poster = encodeURI('assets/videos/posters/' + name + '.jpg');
     v.dataset.src = encodeURI('assets/videos/' + name + '.mp4');
     scr.appendChild(v); f.appendChild(scr); return f;
   };
@@ -255,17 +255,31 @@
 
 /* ================================================================
    FILM SLOTS — 画面に近づいたら読み込んで再生、離れたら止める。
-   ファイルがない枠は、「配置してください」の表示のまま残る
+   冒頭の演出（ハート→粒子）が終わるまで（またはスクロールするまで）は、
+   大きな映像を読み込まない。演出に回線とCPUを譲る
 ================================================================ */
 (function () {
+  let go = false;
+  const waiting = new Set();
+  const start = (v) => {
+    if (v.dataset.poster && !v.poster) v.poster = v.dataset.poster;
+    if (!v.getAttribute('src')) v.setAttribute('src', v.dataset.src);
+    v.play().catch(() => {});
+  };
+  const open = () => {
+    if (go) return; go = true;
+    waiting.forEach(start); waiting.clear();
+  };
+  window.addEventListener('hero-done', open);
+  window.addEventListener('scroll', () => { if (window.scrollY > 12) open(); }, { passive: true });
+  setTimeout(open, 12000);   // 何かの理由で演出が終わらなくても、いずれ開く
+
   const films = document.querySelectorAll('.film video[data-src]');
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       const v = e.target;
-      if (e.isIntersecting) {
-        if (!v.getAttribute('src')) v.setAttribute('src', v.dataset.src);
-        v.play().catch(() => {});
-      } else { v.pause(); }
+      if (e.isIntersecting) { if (go) start(v); else waiting.add(v); }
+      else { waiting.delete(v); v.pause(); }
     });
   }, { rootMargin: '240px 320px' });
   films.forEach((v) => {
