@@ -508,3 +508,6 @@ h1, h2, h3, .sec-title, .lead, .principle-card .k, .hn b, #menu li a span, .chai
 #installation .feature .film.picked { transform: scale(1.1); z-index: 20; box-shadow: 0 30px 120px rgba(0,0,0,0.85); }
 #installation .film { cursor: pointer; }
 @media (max-width: 860px) { #installation .wall .film.picked { transform: scale(1.5); } }
+
+/* 何かの理由でスクリプトが働かなくても、内容は必ず読める */
+.rv-fallback .rv { opacity: 1 !important; transform: none !important; }

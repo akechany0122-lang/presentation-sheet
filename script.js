@@ -400,3 +400,64 @@
     btn.setAttribute('aria-label', v.muted ? '音を出す' : '音を消す');
   });
 })();
+
+/* ================================================================
+   REVEAL — 要素を、ゆっくりと現す
+================================================================ */
+(function () {
+  window.__rvOK = true;
+  const targets = [...document.querySelectorAll('.rv')];
+  const show = (el) => el.classList.add('in');
+  // 画面に入ったら現す。IntersectionObserver が働かない環境でも、スクロール位置で現す
+  const check = () => {
+    const h = window.innerHeight * 0.94;
+    targets.forEach((el) => { if (!el.classList.contains('in') && el.getBoundingClientRect().top < h) show(el); });
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => { if (e.isIntersecting) { show(e.target); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.02 });
+    targets.forEach((el) => io.observe(el));
+  }
+  window.addEventListener('scroll', check, { passive: true });
+  window.addEventListener('resize', check);
+  check(); setTimeout(check, 600);
+})();
+
+/* ================================================================
+   HEART MENU — 左上のハートを押すと、要所へ飛べるメニューが開く。
+   ハートは、スクロールに合わせて、下から満ちていく
+================================================================ */
+(function () {
+  const btn = document.getElementById('navheart'), menu = document.getElementById('menu');
+  const links = [...menu.querySelectorAll('li a')];
+  const sections = links.map((a) => { const h = a.getAttribute('href'); return h.charAt(0) === '#' ? document.querySelector(h) : null; });
+  const setOpen = (open) => {
+    document.body.classList.toggle('menu-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+    menu.setAttribute('aria-hidden', String(!open));
+    if (open) links[0].focus({ preventScroll: true }); else btn.focus({ preventScroll: true });
+  };
+  btn.addEventListener('click', () => setOpen(!document.body.classList.contains('menu-open')));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-open')) setOpen(false); });
+  menu.addEventListener('click', (e) => { if (e.target === menu) setOpen(false); });
+  links.forEach((a, i) => a.addEventListener('click', (e) => {
+    if (!sections[i]) { setOpen(false); return; }   // 作品のサイトへ（別のタブで開く）
+    e.preventDefault();
+    document.body.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true');
+    const y = sections[i].getBoundingClientRect().top + window.scrollY - 40;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }));
+
+  // いま居る章の印、と、ハートの満ち具合
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    btn.style.setProperty('--p', (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0).toFixed(1) + '%');
+    let cur = -1;
+    sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.45) cur = i; });
+    links.forEach((a, i) => a.classList.toggle('now', i === cur));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
