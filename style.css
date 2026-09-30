@@ -276,3 +276,120 @@ ul.plain.dense { margin-top: 36px; }
   .drift { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
   .drift .track { animation: none; }
 }
+
+/* ============================================================ ハート：ロゴをそのままアイコンに ============================================================ */
+.hi {
+  display: inline-block; width: 1em; height: 0.81em; vertical-align: -0.08em; flex: none;
+  background: currentColor;
+  -webkit-mask: url(assets/heart-400.png) center / contain no-repeat;
+          mask: url(assets/heart-400.png) center / contain no-repeat;
+}
+.eyebrow { display: flex; align-items: center; gap: 12px; }
+.eyebrow .hi { font-size: 15px; color: var(--fg-dim); }
+
+/* 左上に常にいる、ハート。押すとメニューが開く。スクロールに合わせて、下から満ちていく */
+#navheart {
+  position: fixed; left: clamp(14px, 2.4vw, 32px); top: clamp(14px, 2.4vw, 30px); z-index: 120;
+  width: 54px; height: 54px; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  opacity: 0; animation: nh-in 1.2s ease 0.4s forwards;
+}
+@keyframes nh-in { to { opacity: 1; } }
+#navheart .hb { position: absolute; inset: 8px; display: block; animation: nh-breathe 4.4s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(255,255,255,0.28)); transition: transform 0.6s cubic-bezier(.2,.8,.2,1); }
+#navheart .hb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#navheart .base { opacity: 0.34; }
+#navheart .fill { clip-path: inset(calc(100% - var(--p, 0%)) 0 0 0); transition: clip-path 0.3s linear; }
+@keyframes nh-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+#navheart:hover .hb { animation: nh-beat 0.7s ease-in-out infinite; }
+@keyframes nh-beat { 0%, 100% { transform: scale(1); } 22% { transform: scale(1.22); } 40% { transform: scale(1.02); } 58% { transform: scale(1.16); } }
+#navheart:focus-visible { outline: 1px solid rgba(255,255,255,0.6); outline-offset: 2px; border-radius: 12px; }
+body.menu-open #navheart .hb { animation: none; transform: scale(1.18) rotate(-8deg); }
+body.menu-open #navheart .base { opacity: 0.9; }
+
+/* メニュー：全面に、大きな文字と、ハートの印 */
+#menu {
+  position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  padding: 0 clamp(28px, 8vw, 140px); background: rgba(3,3,4,0.93); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+}
+body.menu-open #menu { opacity: 1; visibility: visible; transition: opacity 0.6s ease; }
+body.menu-open { overflow: hidden; }
+#menu ul { list-style: none; margin: 0; padding: 0; }
+#menu a { display: flex; align-items: center; gap: 22px; text-decoration: none; color: var(--fg); padding: 9px 0; }
+#menu li a span { font-family: var(--serif); font-size: clamp(24px, 4.2vw, 50px); letter-spacing: 0.16em; line-height: 1.4; transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.4s; }
+#menu li a em { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--fg-faint); opacity: 0; transform: translateX(-8px); transition: opacity 0.4s, transform 0.5s; }
+#menu .hi { font-size: clamp(20px, 2.8vw, 34px); color: rgba(236,235,231,0.22); transition: color 0.4s, transform 0.5s cubic-bezier(.3,1.6,.4,1); }
+#menu li a:hover .hi, #menu li a.now .hi { color: #fff; transform: scale(1.35); animation: nh-beat 0.9s ease-in-out infinite; }
+#menu li a:hover span { transform: translateX(10px); }
+#menu li a:hover em, #menu li a.now em { opacity: 1; transform: none; }
+#menu li a:not(:hover):not(.now) span { opacity: 0.72; }
+#menu .menu-cta { margin-top: clamp(28px, 6vh, 56px); padding: 14px 26px 14px 20px; border: 1px solid rgba(236,235,231,0.34); border-radius: 999px; gap: 14px; transition: background 0.5s, color 0.5s, border-color 0.5s; }
+#menu .menu-cta span { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.3em; }
+#menu .menu-cta .hi { font-size: 16px; color: #fff; }
+#menu .menu-cta:hover { background: var(--fg); color: #000; border-color: var(--fg); }
+#menu .menu-cta:hover .hi { color: #000; animation: nh-beat 0.7s ease-in-out infinite; }
+#menu .menu-cta:hover span { transform: none; }
+/* 開いたとき、一つずつ現れる */
+#menu li, #menu .menu-cta { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.2,.8,.2,1), background 0.5s, color 0.5s, border-color 0.5s; }
+body.menu-open #menu li, body.menu-open #menu .menu-cta { opacity: 1; transform: none; }
+body.menu-open #menu li:nth-child(1) { transition-delay: 0.10s; } body.menu-open #menu li:nth-child(2) { transition-delay: 0.16s; }
+body.menu-open #menu li:nth-child(3) { transition-delay: 0.22s; } body.menu-open #menu li:nth-child(4) { transition-delay: 0.28s; }
+body.menu-open #menu li:nth-child(5) { transition-delay: 0.34s; } body.menu-open #menu li:nth-child(6) { transition-delay: 0.40s; }
+body.menu-open #menu li:nth-child(7) { transition-delay: 0.46s; } body.menu-open #menu .menu-cta { transition-delay: 0.56s; }
+
+/* 概要：流れを、ハートでつなぐ */
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin: 0 0 clamp(48px, 8vh, 88px); font-family: var(--serif); font-size: clamp(15px, 1.8vw, 20px); letter-spacing: 0.14em; }
+.chain .hi { font-size: 14px; color: rgba(236,235,231,0.45); }
+.ref { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; color: var(--fg-faint); margin: 36px 0 0; }
+dl.spec { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-top: 0; }
+
+/* コンセプト：五つのハートが、一つずつ満ちていく */
+.principle-card { gap: 14px; }
+.hs { display: flex; gap: 9px; font-size: 15px; color: rgba(236,235,231,0.16); }
+.hs .hi.on { color: #fff; filter: drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
+
+/* 流れ：数字の背に、ハート */
+.hn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: clamp(64px, 7vw, 92px); height: clamp(52px, 5.7vw, 75px); color: rgba(236,235,231,0.2); }
+.hn .hi { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hn b { position: relative; font-family: var(--serif); font-weight: 400; font-size: clamp(20px, 2.4vw, 30px); color: var(--fg); padding-top: 2px; }
+.hn.on { color: #fff; } .hn.on b { color: #000; }
+.flow-row .txt .n { font-size: 0; line-height: 0; margin-bottom: 22px; color: inherit; }
+.flow-row:hover .hn .hi { animation: nh-beat 1s ease-in-out infinite; color: rgba(236,235,231,0.5); }
+.flow-row .txt p { font-size: 14.5px; color: var(--fg); }
+
+/* 粒子：三つの層 */
+.layers .t { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: clamp(16px, 1.7vw, 20px); letter-spacing: 0.16em; color: var(--fg); margin-bottom: 12px; }
+.layers .t .hi { font-size: 14px; color: rgba(236,235,231,0.5); }
+.layers .t small { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--fg-faint); }
+.band .over h3 { font-size: clamp(22px, 3.4vw, 46px); }
+
+/* 開閉：ハートが、開くと満ちる */
+details.more summary { justify-content: flex-start; gap: 16px; }
+details.more summary::before { content: ''; width: 18px; height: 15px; background: rgba(236,235,231,0.3); -webkit-mask: url(assets/heart-400.png) center / contain no-repeat; mask: url(assets/heart-400.png) center / contain no-repeat; transition: background 0.4s, transform 0.5s cubic-bezier(.3,1.6,.4,1); flex: none; }
+details.more[open] summary::before { background: #fff; transform: scale(1.25); }
+details.more summary:hover::before { background: #fff; }
+details.more summary::after { margin-left: auto; }
+
+/* 制作プロセス：ハートの番号 → 短い二行 */
+.process-row { grid-template-columns: clamp(72px, 8vw, 104px) 1fr 1fr; align-items: center; gap: 0 24px; padding: 26px 0; font-size: 14.5px; }
+.process-row .idx { grid-row: auto; padding: 0; }
+.process-row .idx .hn { width: 52px; height: 42px; } .process-row .idx .hn b { font-size: 15px; }
+.process-row .found { margin-top: 0; }
+.process-row .found::before { content: '→'; margin-right: 12px; color: var(--fg-faint); }
+.process-row.goal .tried, .process-row.goal .found { color: #fff; }
+.process-row:hover .hn .hi { animation: nh-beat 1s ease-in-out infinite; }
+@media (max-width: 860px) {
+  .process-row { grid-template-columns: 60px 1fr; }
+  .process-row .found { grid-column: 2; margin-top: 8px; }
+  #navheart { width: 48px; height: 48px; }
+}
+
+/* フッター */
+.footer-cta { display: inline-flex; align-items: center; gap: 14px; padding: 15px 30px 15px 22px; border: 1px solid rgba(236,235,231,0.4); border-radius: 999px; transition: background 0.5s, color 0.5s, border-color 0.5s; }
+.footer-cta .hi { font-size: 17px; }
+.footer-cta:hover { background: var(--fg); color: #000; border-color: var(--fg); opacity: 1; }
+.footer-cta:hover .hi { animation: nh-beat 0.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  #navheart, #navheart .hb, #menu li a .hi { animation: none !important; }
+  #navheart { opacity: 1; }
+}

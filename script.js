@@ -332,3 +332,40 @@
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.04 });
   targets.forEach((el) => io.observe(el));
 })();
+
+/* ================================================================
+   HEART MENU — 左上のハートを押すと、要所へ飛べるメニューが開く。
+   ハートは、スクロールに合わせて、下から満ちていく
+================================================================ */
+(function () {
+  const btn = document.getElementById('navheart'), menu = document.getElementById('menu');
+  const links = [...menu.querySelectorAll('li a')];
+  const sections = links.map((a) => document.querySelector(a.getAttribute('href')));
+  const setOpen = (open) => {
+    document.body.classList.toggle('menu-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+    menu.setAttribute('aria-hidden', String(!open));
+    if (open) links[0].focus({ preventScroll: true }); else btn.focus({ preventScroll: true });
+  };
+  btn.addEventListener('click', () => setOpen(!document.body.classList.contains('menu-open')));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-open')) setOpen(false); });
+  menu.addEventListener('click', (e) => { if (e.target === menu) setOpen(false); });
+  links.forEach((a, i) => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.body.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true');
+    const y = sections[i].getBoundingClientRect().top + window.scrollY - 40;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }));
+
+  // いま居る章の印、と、ハートの満ち具合
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    btn.style.setProperty('--p', (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0).toFixed(1) + '%');
+    let cur = -1;
+    sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.45) cur = i; });
+    links.forEach((a, i) => a.classList.toggle('now', i === cur));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();

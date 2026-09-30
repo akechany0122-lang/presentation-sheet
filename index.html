@@ -15,6 +15,24 @@
 </head>
 <body>
 
+<!-- ============================================================ ハートのメニュー（常に左上） ============================================================ -->
+<button id="navheart" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="menu">
+  <span class="hb"><img class="base" src="assets/heart-400.png" alt=""><img class="fill" src="assets/heart-400.png" alt=""></span>
+</button>
+<nav id="menu" aria-hidden="true" aria-label="ページ内の移動">
+  <ul>
+    <li><a href="#overview"><i class="hi"></i><span>作品概要</span><em>Overview</em></a></li>
+    <li><a href="#concept"><i class="hi"></i><span>コンセプト</span><em>Concept</em></a></li>
+    <li><a href="#flow"><i class="hi"></i><span>体験の流れ</span><em>Flow</em></a></li>
+    <li><a href="#particles"><i class="hi"></i><span>粒子</span><em>Particles</em></a></li>
+    <li><a href="#system"><i class="hi"></i><span>仕組み</span><em>System</em></a></li>
+    <li><a href="#process"><i class="hi"></i><span>制作プロセス</span><em>Process</em></a></li>
+    <li><a href="#gallery"><i class="hi"></i><span>体験の記録</span><em>Gallery</em></a></li>
+  </ul>
+  <a class="menu-cta" href="https://human-expression-art2.vercel.app" target="_blank" rel="noopener"><i class="hi"></i><span>作品を体験する</span><em>↗</em></a>
+</nav>
+
+
 
 <!-- ============================================================ HERO ============================================================ -->
 <div id="stage">
@@ -45,45 +63,36 @@
 <!-- ============================================================ 作品概要 ============================================================ -->
 <section class="block" id="overview">
   <div class="wrap">
-    <p class="eyebrow rv">ココロノセイセイ — 01 / 作品概要</p>
+    <p class="eyebrow rv"><i class="hi"></i>01 / Overview</p>
     <h2 class="sec-title big rv">言葉を使わず、<br>今の心から、一枚の絵を。</h2>
-    <p class="lead rv">「ココロノセイセイ」は、言葉を一切使わずに、その人の今の心から一枚の絵を生み出す作品です。</p>
-    <div class="body rv">
-      <p>カメラとマイクが表情・姿勢・声を読み取り、その数値から画像生成AIが抽象画を描きます。絵は無数の粒子で組み直され、完成した後も、見る人の表情・動き・声に反応してうねり続けます。</p>
-    </div>
-  </div>
-  <div class="wrap">
+    <p class="chain rv"><span>表情・姿勢・声</span><i class="hi"></i><span>数値</span><i class="hi"></i><span>AIの絵</span><i class="hi"></i><span>粒子</span></p>
     <dl class="spec rv">
-      <div><dt>作品名</dt><dd>ココロノセイセイ</dd></div>
-      <div><dt>形式</dt><dd>Webブラウザで動くインタラクティブ作品</dd></div>
-      <div><dt>入力</dt><dd>Webカメラ（表情・全身の姿勢）、マイク（声）</dd></div>
-      <div><dt>出力</dt><dd>一人ひとりに固有の抽象画。粒子でできていて、ライブで変容し続ける</dd></div>
-      <div><dt>体験時間</dt><dd>位置合わせ・スキャン約10秒 ＋ 録画5／10／20秒 ＋ 生成 ＋ 鑑賞</dd></div>
-      <div><dt>公開URL</dt><dd>human-expression-art2.vercel.app</dd></div>
+      <div><dt>形式</dt><dd>Webブラウザ</dd></div>
+      <div><dt>入力</dt><dd>カメラ・マイク</dd></div>
+      <div><dt>出力</dt><dd>一人に一枚、粒子の絵</dd></div>
+      <div><dt>体験</dt><dd>録画 5／10／20秒 から選ぶ</dd></div>
+      <div><dt>URL</dt><dd>human-expression-art2.vercel.app</dd></div>
     </dl>
   </div>
 </section>
 
-<!-- ============================================================ 制作背景 / コンセプト ============================================================ -->
+<!-- ============================================================ コンセプト ============================================================ -->
 <section class="block" id="concept">
   <div class="wrap wide">
     <div class="split">
       <div class="sticky">
-        <p class="eyebrow rv">02 / 制作背景とコンセプト</p>
+        <p class="eyebrow rv"><i class="hi"></i>02 / Concept</p>
         <h2 class="sec-title rv">言葉にした瞬間に、<br>こぼれ落ちるものへ。</h2>
-        <div class="body rv">
-          <p>出発点は、生成AIが「プロンプト」という言葉を前提にしていることへの違和感です。心に浮かんだものを言葉に置き換えた瞬間、意図からずれが生まれ、言葉にできない部分は切り捨てられてしまいます。</p>
-          <p>そこで二つの問いを立てました。言葉を介さず、表情・身振り・声という無意識の反射から、そのままビジュアルを生み出せないか。AIに、感情という掴めないものを、何らかの形として表現させられないか。</p>
-          <p>参照したのは、Refik Anadol のデータ彫刻です。彼はデータを絵の具として扱い、一つのモチーフの中で、見るたびに異なる表情を生み出しています。本作では、そのデータにあたるものを、体験者自身の身体と声にしました。</p>
-        </div>
+        <p class="lead rv">言葉を介さず、身体と声から、そのまま絵を生む。</p>
+        <p class="ref rv">参照 — Refik Anadol のデータ彫刻</p>
       </div>
       <div>
         <div class="principle-grid">
-          <div class="principle-card rv"><div class="n">01</div><div class="k">言葉はいらない</div><div class="v">体験者は文字も言葉も使わない</div><div class="impl">入力は表情・姿勢・声を数値にしたものだけ</div></div>
-          <div class="principle-card rv"><div class="n">02</div><div class="k">万物は数で表せる</div><div class="v">心の状態も、数の並びとして扱える</div><div class="impl">表情筋・姿勢・声を約20種類の数値にする</div></div>
-          <div class="principle-card rv"><div class="n">03</div><div class="k">意味で結びつけない</div><div class="v">「笑顔ならオレンジ」のような先入観を持ち込まない</div><div class="impl">素材や色は、数値から機械的に引き当てる。対応関係は読み解けない</div></div>
-          <div class="principle-card rv"><div class="n">04</div><div class="k">あわい</div><div class="v">具象すぎず、抽象すぎず、何かにも見える</div><div class="impl">「抽象的な流体の彫刻」という一つの型の中で、素材・色・質感が変わる</div></div>
-          <div class="principle-card rv"><div class="n">05</div><div class="k">一期一会</div><div class="v">同じ人でも、二度と同じ絵にならない</div><div class="impl">数値に乱数を加えて、毎回異なる絵を生成する</div></div>
+          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i></div><div class="k">言葉はいらない</div><div class="v">入力は、表情・姿勢・声だけ。</div></div>
+          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i></div><div class="k">万物は数で表せる</div><div class="v">心も、約20の数値になる。</div></div>
+          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi"></i><i class="hi"></i></div><div class="k">意味で結びつけない</div><div class="v">「笑顔ならオレンジ」を持ち込まない。</div></div>
+          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi"></i></div><div class="k">あわい</div><div class="v">具象と抽象のあいだ。</div></div>
+          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i></div><div class="k">一期一会</div><div class="v">同じ人でも、二度と同じ絵にならない。</div></div>
         </div>
       </div>
     </div>
@@ -93,72 +102,69 @@
 <!-- ============================================================ 体験の流れ ============================================================ -->
 <section class="block" id="flow">
   <div class="wrap wide">
-    <p class="eyebrow rv">03 / 体験の流れ</p>
-    <h2 class="sec-title rv">画面の案内は、白いハートと<br>人型のガイドだけ。</h2>
-    <p class="lead rv" style="margin-bottom:clamp(72px,12vh,140px)">体験は六つの段階で進みます。体験者は、何も書かず、何も言わなくてよい。</p>
+    <p class="eyebrow rv"><i class="hi"></i>03 / Flow</p>
+    <h2 class="sec-title rv" style="margin-bottom:clamp(72px,12vh,140px)">案内は、白いハートと<br>人型だけ。</h2>
     <div class="flow-row rv">
       <figure class="film " style="--ratio:16/9" data-video="flow-01">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/web/flow-01.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/web/flow-01.jpg" data-src="assets/videos/web/flow-01.mp4"></video></div>
-        <figcaption><b>01</b>ハートに触れて、始まる</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">01</div><h3>タイトル と カメラ選択</h3><p>白いハートが約5秒周期で呼吸するように膨らみます。画面のどこに触れても始まり、内蔵カメラか外部カメラかを選びます。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>1</b></span></div><h3>ハートに触れる</h3><p>触れると、始まる。</p></div>
     </div>
     <div class="flow-row rev rv">
       <figure class="film " style="--ratio:16/9" data-video="scan">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/scan.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/scan.jpg" data-src="assets/videos/scan.mp4"></video></div>
-        <figcaption><b>02</b>白い人型に、自分の体を重ねる</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">02</div><h3>位置合わせ</h3><p>白い人型のガイドが表示され、体が映った部位から、実線になっていきます。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>2</b></span></div><h3>体を重ねる</h3><p>白い人型に、自分を合わせる。</p></div>
     </div>
     <div class="flow-row rv">
       <figure class="film " style="--ratio:16/9" data-video="scan2">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/scan2.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/scan2.jpg" data-src="assets/videos/scan2.mp4"></video></div>
-        <figcaption><b>03</b>全身が揃うと、ハートが満ちていく</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">03</div><h3>スキャン（3秒）</h3><p>全身が揃うと、胸のハートが下から色で満ちていきます。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>3</b></span></div><h3>スキャン</h3><p>全身が揃うと、ハートが満ちる。</p></div>
     </div>
     <div class="flow-row rev rv">
       <figure class="film " style="--ratio:16/9" data-video="rec">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/rec.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/rec.jpg" data-src="assets/videos/rec.mp4"></video></div>
-        <figcaption><b>04</b>表情も、動きも、声も、自由に</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">04</div><h3>録画（5／10／20秒）</h3><p>自由に表情を変え、体を動かし、声を出します。この間の数値が、絵の種になります。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>4</b></span></div><h3>動く・声を出す</h3><p>表情も、体も、声も、自由に。</p></div>
     </div>
     <div class="flow-row rv">
       <figure class="film " style="--ratio:16/9" data-video="seisei">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/seisei.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/seisei.jpg" data-src="assets/videos/seisei.mp4"></video></div>
-        <figcaption><b>05</b>数値が、素材と色に変わる</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">05</div><h3>生成</h3><p>録画した数値から指示文を組み立て、画像生成AIが絵を描きます。数値が、素材と色に変わります。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>5</b></span></div><h3>絵になる</h3><p>数値が、素材と色に変わる。</p></div>
     </div>
     <div class="flow-row rev rv">
       <figure class="film " style="--ratio:16/9" data-video="human">
         <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/human.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/human.jpg" data-src="assets/videos/human.mp4"></video></div>
-        <figcaption><b>06</b>粒子の絵が、今の心でうねり続ける</figcaption>
+        <figcaption></figcaption>
       </figure>
-      <div class="txt"><div class="n">06</div><h3>ライブ</h3><p>絵が粒子で立ち上がり、今の表情・動き・声に反応してうねり続けます。</p></div>
+      <div class="txt"><div class="n"><span class="hn"><i class="hi"></i><b>6</b></span></div><h3>うねり続ける</h3><p>今の心に、絵が応える。</p></div>
     </div>
 
-    <p class="step-note rv">ライブ中は、右上のメニューから「ビジュアルを保存」「もう一度生成」「センサー映像を表示」「タイトルに戻る」を選べます。マウスを3秒動かさないとメニューとカーソルは消え、絵だけが残ります。</p>
   </div>
 </section>
 
 <!-- ============================================================ 粒子 ============================================================ -->
 <section class="block" id="particles" style="padding-bottom:0">
   <div class="wrap wide">
-    <p class="eyebrow rv">04 / 粒子による再構築と変容</p>
-    <h2 class="sec-title rv">遠目には一枚の油絵に、<br>近づくと無数の粒がうねる。</h2>
-    <p class="lead rv">生成した絵は、そのまま表示しません。粒子が絵の具となってその色を運び、絵を組み直します。GPU上で動く262,144個（512×512）の粒子と、最大400万粒の顔料キャンバスの二重構造です。</p>
+    <p class="eyebrow rv"><i class="hi"></i>04 / Particles</p>
+    <h2 class="sec-title rv">遠目には油絵に、<br>近づくと無数の粒。</h2>
   </div>
   <figure class="film band bleed rv" style="--ratio:21/9;margin-top:clamp(48px,8vh,96px)" data-video="image">
     <div class="screen"><div class="fallback"><span class="ring">▶</span><span>assets/videos/image.mp4<br>を配置してください</span></div><video muted loop playsinline preload="none" data-poster="assets/videos/posters/image.jpg" data-src="assets/videos/image.mp4"></video></div>
-    <div class="over"><div class="wrap wide" style="padding:0"><h3>絵が変わるとき、粒子は散らばらない。</h3><p>色を保ったまま、新しい絵の対応する場所へ弧を描いて移動します。</p></div></div>
+    <div class="over"><div class="wrap wide" style="padding:0"><h3>262,144個の粒子が、絵の具になる。</h3></div></div>
   </figure>
   <div class="wrap wide">
     <div class="layers rv">
-      <div><div class="t">反射　30〜60ms</div><p>声を出した瞬間に、その位置から同心円の衝撃波が走る。表情の急な変化が即座に表れる。</p></div>
-      <div><div class="t">慣性　数百ms</div><p>体の急な動きのカクつきを吸収し、大きなうねりに変える。</p></div>
-      <div><div class="t">基調　数秒</div><p>緊張度や感情の極性の、ゆっくりした揺らぎが、全体の流れに表れる。</p></div>
+      <div><div class="t"><i class="hi"></i>反射 <small>30–60ms</small></div><p>声の瞬間、衝撃波が走る。</p></div>
+      <div><div class="t"><i class="hi"></i>慣性 <small>数百ms</small></div><p>体の動きが、うねりになる。</p></div>
+      <div><div class="t"><i class="hi"></i>基調 <small>数秒</small></div><p>ゆっくりとした、揺らぎ。</p></div>
     </div>
   </div>
 </section>
@@ -166,9 +172,8 @@
 <!-- ============================================================ 仕組み ============================================================ -->
 <section class="block" id="system">
   <div class="wrap">
-    <p class="eyebrow rv">05 / システム全体像</p>
+    <p class="eyebrow rv"><i class="hi"></i>05 / System</p>
     <h2 class="sec-title rv">数値は、二つの流れで<br>絵に届く。</h2>
-    <p class="lead rv">録画の数値は、終わった時に一度だけ絵の中身（素材・色・構図）を決め、ライブの数値は、体験中ずっと絵の動きを決めます。</p>
     <div class="diagram-wrap rv">
       <svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="システム全体像の図。録画した生体データが素材と色を決め、ライブの生体データが粒子の動きを決め、両方が一つのビジュアルに合流する。">
         <defs>
@@ -217,7 +222,6 @@
         <text x="730" y="199" class="sub">絵の色を保ったまま、うねり続ける</text>
         <path class="edge" d="M704,186 H712"/>
       </svg>
-      <p class="diagram-caption">左の流れで生まれた抽象画が粒子の色になり、下の流れが、その粒子を今の表情・動き・声で揺らし続けます。</p>
     </div>
     <div style="margin-top:clamp(56px,9vh,96px)" class="rv">
       <details class="more"><summary>生体データの読み取り</summary><div class="in">
@@ -276,18 +280,16 @@ no people, highly detailed</code></div>
 <!-- ============================================================ 制作プロセス ============================================================ -->
 <section class="block" id="process">
   <div class="wrap">
-    <p class="eyebrow rv">06 / 制作プロセス</p>
-    <h2 class="sec-title rv">どんな感情でも似た絵になる、<br>という壁を越えて。</h2>
-    <p class="lead rv">数式だけで絵を作る方法を段階的に試し、最後に「モチーフ」を持ち込む現在の形にたどり着きました。</p>
+    <p class="eyebrow rv"><i class="hi"></i>06 / Process</p>
+    <h2 class="sec-title rv">壁を越えて、<br>モチーフへ。</h2>
     <div class="rv">
-      <div class="process-row"><div class="idx">1</div><div class="tried"><span class="lbl">試したこと</span>声の大きさで、光の大きさが変わる</div><div class="found"><span class="lbl">分かったこと</span>入力が一つでは、大きさが変わるだけで表現にならない</div></div>
-      <div class="process-row"><div class="idx">2</div><div class="tried"><span class="lbl">試したこと</span>GPUの粒子流体に、表情・姿勢・声を割り当てる</div><div class="found"><span class="lbl">分かったこと</span>声ばかりが目立つ。目立つ表現（色・形）に表情を割り当て直した</div></div>
-      <div class="process-row"><div class="idx">3</div><div class="tried"><span class="lbl">試したこと</span>表情の数値を52種類に広げ、個人差を補正する</div><div class="found"><span class="lbl">分かったこと</span>読み取りの精度は上がったが、絵は似たままだった</div></div>
-      <div class="process-row"><div class="idx">4</div><div class="tried"><span class="lbl">試したこと</span>粘菌の動きや、生命のように振る舞うセル計算を使う</div><div class="found"><span class="lbl">分かったこと</span>この種の計算は、どれも少数の形に落ち着いてしまう</div></div>
-      <div class="process-row"><div class="idx">5</div><div class="tried"><span class="lbl">試したこと</span>2Dの絵画表現で、性質の違う8つの数式とカオス計算を混ぜる</div><div class="found"><span class="lbl">分かったこと</span>質感は上がったが、数式だけでは絵のジャンルの幅に限界がある</div></div>
-      <div class="process-row"><div class="idx">6</div><div class="tried"><span class="lbl">試したこと</span>数値から素材と色を引き当て、AIが描いた絵を粒子で組み直す</div><div class="found"><span class="lbl">分かったこと</span>モチーフが絵の完成度を支え、数値の違いが世界観の違いとして表れる</div></div>
+      <div class="process-row"><div class="idx"><span class="hn"><i class="hi"></i><b>1</b></span></div><div class="tried">声の大きさで、光が変わる</div><div class="found">入力が一つでは、表現にならない</div></div>
+      <div class="process-row"><div class="idx"><span class="hn"><i class="hi"></i><b>2</b></span></div><div class="tried">粒子流体に、表情・姿勢・声を割り当てる</div><div class="found">声ばかりが目立つ</div></div>
+      <div class="process-row"><div class="idx"><span class="hn"><i class="hi"></i><b>3</b></span></div><div class="tried">表情の数値を52種類に広げる</div><div class="found">精度は上がったが、絵は似たまま</div></div>
+      <div class="process-row"><div class="idx"><span class="hn"><i class="hi"></i><b>4</b></span></div><div class="tried">粘菌・セル計算を使う</div><div class="found">少数の形に落ち着いてしまう</div></div>
+      <div class="process-row"><div class="idx"><span class="hn"><i class="hi"></i><b>5</b></span></div><div class="tried">8つの数式とカオスを混ぜる</div><div class="found">絵の幅に限界がある</div></div>
+      <div class="process-row goal"><div class="idx"><span class="hn on"><i class="hi"></i><b>6</b></span></div><div class="tried">数値から素材と色を引き当て、AIの絵を粒子で組み直す</div><div class="found">モチーフが、完成度を支える</div></div>
     </div>
-    <div class="body rv" style="margin-top:56px"><p>転機は、Anadol が一つの作品で一つのモチーフ（街並みや美術作品）を貫いていると気づいたことです。本作では「抽象的な流体の彫刻」という一つの型を守り、その中で素材・色・質感を数値に委ねています。</p></div>
   </div>
 </section>
 
@@ -295,8 +297,8 @@ no people, highly detailed</code></div>
 <!-- 動画スロット：data-clips に、assets/videos/ 内の mp4 のファイル名（拡張子なし）を書くと、ランダムな大きさ・順序で流れる。ポスターは assets/videos/posters/ に同名の jpg -->
 <section class="block" id="gallery">
   <div class="wrap wide">
-    <p class="eyebrow rv">07 / 体験の記録</p>
-    <h2 class="sec-title rv">プロジェクターで投影された、<br>ココロノセイセイに触れた人たち。</h2>
+    <p class="eyebrow rv"><i class="hi"></i>07 / Gallery</p>
+    <h2 class="sec-title rv">触れた人たち。</h2>
   </div>
   <div class="group">
     <div class="wrap wide"><p class="group-label rv"><b>A</b>身体が動く</p></div>
@@ -316,14 +318,13 @@ no people, highly detailed</code></div>
 <!-- ============================================================ FOOTER ============================================================ -->
 <footer id="footer">
   <div class="wrap">
-    <img class="footer-heart rv" src="assets/heart-400.png" alt="">
+    <img class="footer-heart rv" src="assets/logo2-heart-white.png" alt="">
     <div class="catchcopy-list rv">
       <div class="cc">言葉になる前の心を、絵に。</div>
       <div class="cc">あなたの今が、絵の具になる。</div>
       <div class="cc">言葉はいらない。心は、もう動いている。</div>
     </div>
-    <p class="footer-desc rv">生成AIに何かを描かせるには、まず言葉で指示しなければならない。しかし心に浮かんだものは、言葉にした瞬間に少しずれ、言葉にならない部分はこぼれ落ちる。「ココロノセイセイ」は、その言葉を取り払う。カメラとマイクが、表情筋の動き、体の揺れ、声の強さを約20種類の数値として読み取り、その数値から素材と色を引き当てて、AIが一枚の抽象画を描く。数値と色の間に意味の対応はなく、「笑顔だから明るい」といった先入観は入り込まない。完成した絵は約26万の粒子として立ち上がり、見る人の今の表情や声に反応して、うねり続ける。</p>
-    <a class="footer-cta rv" href="https://human-expression-art2.vercel.app" target="_blank" rel="noopener">作品を体験する ↗</a>
+    <a class="footer-cta rv" href="https://human-expression-art2.vercel.app" target="_blank" rel="noopener"><i class="hi"></i>作品を体験する ↗</a>
     <img class="footer-wordmark rv" src="assets/logo-wordmark-white.png" alt="ココロノセイセイ">
     <div class="footer-meta rv">
       <span>ココロノセイセイ</span>
