@@ -61,7 +61,7 @@
 <section class="block" id="about">
   <div class="wrap wide">
     <div class="split">
-      <div class="sticky">
+      <div>
         <p class="eyebrow rv"><i class="hi"></i>01</p>
         <h2 class="sec-title rv">ココロノセイセイとは</h2>
         <p class="key rv">イメージを、形に。<br>言語を使わずに、生成する。</p>
@@ -73,13 +73,20 @@
         <p class="chain rv"><span>表情・呼吸・声</span><i class="hi"></i><span>流体</span><i class="hi"></i><span>形</span></p>
         <p class="ref rv">インタラクティブ・インスタレーション</p>
       </div>
-      <div>
-        <div class="principle-grid">
-          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i></div><div class="k">言語はいらない</div><div class="v">入力は、表情・呼吸・声。無意識の生体データだけ。</div></div>
-          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i></div><div class="k">万物は数で表せる</div><div class="v">心も、約20の数値になる。</div></div>
-          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi"></i><i class="hi"></i></div><div class="k">意味で結びつけない</div><div class="v">「笑顔ならオレンジ」を持ち込まない。</div></div>
-          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi"></i></div><div class="k">あわい</div><div class="v">具象と抽象のあいだ。</div></div>
-          <div class="principle-card rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i></div><div class="k">一期一会</div><div class="v">同じ人でも、二度と同じ形にならない。</div></div>
+      <div class="story">
+        <div class="story-item rv"><div class="hs"><i class="hi on"></i><i class="hi"></i><i class="hi"></i><i class="hi"></i></div>
+          <p class="s-main">画像生成AIは、アイデアを可視化してくれる。</p>
+          <p class="s-sub">けれど、必ず<b>「プロンプト（言葉）」</b>というフィルターを通さなければならない。</p>
+        </div>
+        <div class="story-item rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi"></i><i class="hi"></i></div>
+          <p class="s-main">言葉で説明した時点で、<br>頭の中にあった純粋なイメージから、図らずもズレてしまう。</p>
+          <p class="s-sub">不器用なものになってしまう、というジレンマ。</p>
+        </div>
+        <div class="story-item rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi"></i></div>
+          <p class="s-main">まだ言葉にできない、<br>あの瞬間の純粋なイメージを、そのまま形にしたい。</p>
+        </div>
+        <div class="story-item rv"><div class="hs"><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i><i class="hi on"></i></div>
+          <p class="s-main">言語を一切介さず、<br>表情や呼吸といった無意識の生体データから、<br>直感的にアートを生成するシステムを構築した。</p>
         </div>
       </div>
     </div>
@@ -132,7 +139,7 @@
 
         <path class="edge" d="M200,68 H260"/>
         <rect x="262" y="40" width="190" height="56" rx="4" class="node"/>
-        <text x="282" y="63" class="lbl">数値 → 指示文</text>
+        <text x="282" y="63" class="lbl">数値 → 素材と色</text>
         <text x="282" y="82" class="sub">素材・色・質感をハッシュで決定</text>
 
         <path class="edge" d="M452,68 H512"/>
@@ -176,22 +183,15 @@
         </ul>
       </div></details>
       <details class="more"><summary>数値からモチーフへ</summary><div class="in">
-        <p class="lead" style="font-size:14px">録画した数値の平均から、素材2つ・色2つ・質感・明暗を決め、画像生成AIへの指示文を機械的に組み立てます。体験者が言葉を書くことはなく、感情を表す単語も一語も使いません。</p>
+        <p class="lead" style="font-size:14px">録画した数値の平均から、素材2つ・色2つ・質感・明暗を決め、画像生成AIに渡す言葉を、機械的に組み立てます。体験者が言葉を書くことはなく、感情を表す単語も一語も使いません。</p>
         <table class="info">
           <tr><th>素材A・素材B</th><td>数値をハッシュ（数を別の数に混ぜ直す計算）にかけ、40語ずつのリストから選ぶ — 例：volcanic obsidian、frosted sea glass、liquid mercury</td></tr>
           <tr><th>色1・色2</th><td>数値を時間で積み重ねて求めた色相を、最も近い色名に置き換える — 例：vermilion、teal、pale violet</td></tr>
           <tr><th>質感</th><td>緊張度を6段階に分ける — 例：glassy smooth、crystalline shards</td></tr>
           <tr><th>明暗</th><td>奥行きと体の開きを5段階に分ける — 例：soft low-contrast、dramatic high-contrast</td></tr>
-          <tr><th>型（固定）</th><td>どの形にも共通 — abstract fluid sculpture、thick impasto oil paint texture</td></tr>
           <tr><th>シード</th><td>数値に乱数を加える — 毎回異なる形になる</td></tr>
         </table>
-        <p class="note">指示文の例（素材と色が変わると、世界観が大きく変わります）：</p>
-        <div class="codebox"><code>abstract fluid sculpture made of frosted sea glass and liquid mercury,
-pale violet and ochre, crystalline shards, soft low-contrast,
-thick impasto oil paint texture, luminous pigment,
-full-frame composition, edge to edge, no border, no text,
-no people, highly detailed</code></div>
-        <div class="body"><p>指示文は英単語でできていますが、単語は意味として選ばれてはいません。数値から引き当てられる「素材の名前」として使われます。ハッシュで選ぶため、わずかな数値の違いで素材が大きく変わり、見る人が「この表情だからこの色」と読み解くことはできません。</p>
+        <div class="body"><p>英単語でできていますが、単語は意味として選ばれてはいません。数値から引き当てられる「素材の名前」として使われます。ハッシュで選ぶため、わずかな数値の違いで素材が大きく変わり、見る人が「この表情だからこの色」と読み解くことはできません。</p>
         <p>画像は、無料で使える pollinations.ai の FLUX モデルで生成します（1280×768ピクセル）。サイト内の中継API（Vercel の関数）を通して取得します。</p></div>
       </div></details>
       <details class="more"><summary>技術スタックと動作環境</summary><div class="in">
@@ -199,7 +199,7 @@ no people, highly detailed</code></div>
           <tr><th>描画</th><td>Three.js r128、自作の GLSL シェーダー — GPU上の粒子と、全画面のシルエットを描く</td></tr>
           <tr><th>人体解析</th><td>MediaPipe Tasks Vision（FaceLandmarker、PoseLandmarker、ImageSegmenter）— 顔468点、全身33点、人物の輪郭をブラウザ内で推定</td></tr>
           <tr><th>音声</th><td>Web Audio API — 声量と周波数を取得</td></tr>
-          <tr><th>画像生成</th><td>pollinations.ai（FLUX）、中継API <code>api/generate.js</code> — 指示文から抽象的な形を生成</td></tr>
+          <tr><th>画像生成</th><td>pollinations.ai（FLUX）、中継API <code>api/generate.js</code> — 数値から選んだ素材と色で、形を生成</td></tr>
           <tr><th>公開</th><td>Vercel — 静的配信と中継APIの実行</td></tr>
         </table>
         <ul class="plain dense">

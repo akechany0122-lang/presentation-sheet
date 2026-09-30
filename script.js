@@ -299,6 +299,8 @@
   document.querySelectorAll('[data-clips]').forEach((el) => {
     shuffle(list(el.dataset.clips)).forEach((n) => el.appendChild(film(n, 'lite/s/', 'rv').f));
   });
+  // インスタレーションの映像は、カーソルを合わせたときだけ、読み込んで再生する
+  document.querySelectorAll('#installation video').forEach((v) => { v.dataset.hover = '1'; });
 })();
 
 /* ================================================================
@@ -350,7 +352,7 @@
     });
   }, { rootMargin: '200px 200px' });
 
-  document.querySelectorAll('.film video[data-src]').forEach((v) => {
+  document.querySelectorAll('.film video[data-src]:not([data-hover])').forEach((v) => {
     v.addEventListener('loadeddata', () => { v.classList.add('on'); v.closest('.film').classList.add('live'); });
     v.addEventListener('error', () => {                     // 通信の一時的な失敗は、やり直す
       v._retry = (v._retry || 0) + 1;
@@ -362,28 +364,51 @@
 })();
 
 /* ================================================================
-   PICK UP — インスタレーション：カーソルを合わせた映像が、ぐっと前に出る
+   HOVER PLAY — インスタレーション：映像は、カーソルを合わせたときに、少し大きくなって再生する。
+   それまでは、静止画のまま（読み込まない）
    ================================================================ */
 (function () {
   const root = document.getElementById('installation');
   if (!root) return;
+  const touch = window.matchMedia('(hover: none)').matches;
   let cur = null;
+
+  // 静止画を、近づいたときに敷く
+  const io = new IntersectionObserver((es) => {
+    es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const v = e.target.querySelector('video'), scr = e.target.querySelector('.screen');
+      if (v && v.dataset.poster) scr.style.backgroundImage = 'url("' + v.dataset.poster + '")';
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: '300px 0px' });
+  root.querySelectorAll('.film').forEach((f) => {
+    const scr = f.querySelector('.screen'); scr.style.backgroundSize = 'cover'; scr.style.backgroundPosition = 'center';
+    const v = f.querySelector('video');
+    v.addEventListener('loadeddata', () => { v.classList.add('on'); f.classList.add('live'); });
+    v.addEventListener('error', () => { if ((v._retry = (v._retry || 0) + 1) < 4) setTimeout(() => { v.load(); v.play().catch(() => {}); }, 1200 * v._retry); });
+    io.observe(f);
+  });
+
   const origin = (f) => {                                     // 端の映像は、外へはみ出さないように、内側へ広がる
-    const b = f.getBoundingClientRect(), W = window.innerWidth;
-    const x = (b.left + b.width / 2) / W;
+    const b = f.getBoundingClientRect(), x = (b.left + b.width / 2) / window.innerWidth;
     f.style.transformOrigin = (x < 0.3 ? 'left' : x > 0.7 ? 'right' : 'center') + ' center';
+  };
+  const play = (f) => {
+    const v = f.querySelector('video');
+    if (!v.getAttribute('src')) v.setAttribute('src', v.dataset.src);
+    v.play().catch(() => {});
   };
   const pick = (f) => {
     if (cur === f) return;
-    if (cur) cur.classList.remove('picked');
-    cur = f; origin(f); f.classList.add('picked'); root.classList.add('picking');
-    const v = f.querySelector('video'); if (v && v.getAttribute('src')) v.play().catch(() => {});
+    if (cur) leave(cur);
+    cur = f; origin(f); f.classList.add('picked'); play(f);
   };
-  const unpick = () => { if (cur) cur.classList.remove('picked'); cur = null; root.classList.remove('picking'); };
+  const leave = (f) => { f.classList.remove('picked'); const v = f.querySelector('video'); v.pause(); if (cur === f) cur = null; };
   root.querySelectorAll('.film').forEach((f) => {
-    f.addEventListener('mouseenter', () => pick(f));
-    f.addEventListener('mouseleave', unpick);
-    f.addEventListener('click', () => { if (window.matchMedia('(hover: none)').matches) { cur === f ? unpick() : pick(f); } });
+    f.addEventListener('mouseenter', () => { if (!touch) pick(f); });
+    f.addEventListener('mouseleave', () => { if (!touch) leave(f); });
+    f.addEventListener('click', () => { if (touch) { cur === f ? leave(f) : pick(f); } });
   });
 })();
 

@@ -11,4 +11,4 @@ Webで使う動画は、軽くしたものだけを置きます（元の撮影�
 - `assets/videos/lite/s/` … インスタレーションの壁（小さく並べる）用の、さらに軽い版（640×360）。
 - `assets/videos/posters/` … 同名の jpg（読み込み前に見える静止画）。
 
-映像の割り当ては `index.html`：スキャン＝`data-list="scan,scan2"`、ウゴク＝`rec`、セイセイ＝`seisei`、ヘンカ＝`data-pool` から4本をランダム、インスタレーション＝中心の `move`・`music`・`walk` と、壁の `data-clips`。
+映像の割り当ては `index.html`：スキャン＝`data-list="scan,scan2"`、ウゴク＝`rec`、セイセイ＝`seisei`、ヘンカ＝`data-pool` から4本をランダム、インスタレーション＝一列目の `move`・`music`・`walk`（同じ大きさ）と、その下の壁の `data-clips`。インスタレーションの映像は、カーソルを合わせたときだけ読み込んで再生します（それまでは静止画）。
