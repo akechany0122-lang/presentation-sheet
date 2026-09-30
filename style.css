@@ -539,3 +539,8 @@ h1, h2, h3, .sec-title, .lead, .principle-card .k, .hn b, #menu li a span, .chai
 .story-item .s-main { font-size: clamp(13.5px, 1.2vw, 16px); line-height: 2.2; letter-spacing: 0.1em; color: var(--fg); }
 .story-item .s-sub { margin-top: 10px; font-size: 12.5px; line-height: 2.1; color: var(--fg-dim); }
 .story-item .s-sub b { font-weight: 400; color: var(--fg); }
+
+
+/* タイトルのハートの周りを押すと、少しだけ下へ */
+#hero-hit { position: absolute; left: 50%; top: 50%; z-index: 5; width: calc(var(--heart) * 2.6); aspect-ratio: 1; transform: translate(-50%, -50%); border: 0; border-radius: 50%; background: transparent; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+#hero-hit:focus-visible { outline: 1px solid rgba(255,255,255,0.5); outline-offset: 4px; }

@@ -486,3 +486,16 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 })();
+
+
+/* ================================================================
+   TITLE TAP — タイトルのハートの周りを押すと、少しだけ下へスクロール
+   リロードのときは、いつもタイトルの演出から始まる（スクロール位置を復元しない）
+================================================================ */
+(function () {
+  const hit = document.getElementById('hero-hit');
+  if (hit) hit.addEventListener('click', () => {
+    window.scrollTo({ top: Math.round(window.innerHeight * 0.42), behavior: 'smooth' });
+  });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) window.scrollTo(0, 0); });
+})();
