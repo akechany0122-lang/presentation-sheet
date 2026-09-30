@@ -247,13 +247,14 @@
 })();
 
 /* ================================================================
-   DRIFT — グループごとの映像を、ランダムな順序・大きさ・高さで並べ、ゆっくり流す
+   FILMS — 名前の一覧から、映像の枠を組み立てる
+   ・data-pool + data-count … 一覧からランダムに count 本を選ぶ（ヘンカ）
+   ・data-clips …………………… 一覧を、すべて、ランダムな順序で並べる（壁）
 ================================================================ */
 (function () {
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const RATIOS = [16 / 9, 16 / 9, 4 / 3, 21 / 9, 1, 3 / 2];
   const build = (name) => {
-    const f = document.createElement('figure'); f.className = 'film';
+    const f = document.createElement('figure'); f.className = 'film rv';
     const scr = document.createElement('div'); scr.className = 'screen';
     const v = document.createElement('video');
     v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
@@ -262,28 +263,13 @@
     v.dataset.src = encodeURI('assets/videos/' + name + '.mp4');
     scr.appendChild(v); f.appendChild(scr); return f;
   };
-  function layout() {
-    document.querySelectorAll('.drift').forEach((d) => {
-      d.textContent = '';
-      const track = document.createElement('div'); track.className = 'track';
-      const H = Math.min(300, Math.max(150, window.innerHeight * 0.27));   // 列の高さ（CSSの --h と同じ）
-      const names = shuffle(d.dataset.clips.split(',').map((s) => s.trim()).filter(Boolean));
-      const items = names.map((n) => {
-        const f = build(n), r = RATIOS[(Math.random() * RATIOS.length) | 0], s = 0.7 + Math.random() * 0.3;
-        const scr = f.firstChild; scr.style.height = (H * s) + 'px'; scr.style.width = (H * s * r) + 'px';
-        f.style.marginTop = (Math.random() * H * 0.26) + 'px';
-        return f;
-      });
-      items.forEach((f) => track.appendChild(f));
-      items.forEach((f) => track.appendChild(f.cloneNode(true)));       // 切れ目なく流れるよう、同じ列をもう一組
-      d.appendChild(track);
-      const half = track.scrollWidth / 2;
-      track.style.setProperty('--dur', (half / (parseFloat(d.dataset.speed) || 30)).toFixed(1) + 's');
-      track.style.setProperty('--dir', d.dataset.dir === 'right' ? 'reverse' : 'normal');
-    });
-  }
-  // 冒頭の演出を邪魔しないよう、ブラウザが手すきになってから組む
-  if (window.requestIdleCallback) requestIdleCallback(layout, { timeout: 2500 }); else setTimeout(layout, 800);
+  const list = (s) => s.split(',').map((x) => x.trim()).filter(Boolean);
+  document.querySelectorAll('[data-pool]').forEach((el) => {
+    shuffle(list(el.dataset.pool)).slice(0, +el.dataset.count || 3).forEach((n) => el.appendChild(build(n)));
+  });
+  document.querySelectorAll('[data-clips]').forEach((el) => {
+    shuffle(list(el.dataset.clips)).forEach((n) => el.appendChild(build(n)));
+  });
 })();
 
 /* ================================================================

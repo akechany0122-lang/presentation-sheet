@@ -10,7 +10,7 @@
   --fg-faint: rgba(236, 235, 231, 0.5);
   --line: rgba(236, 235, 231, 0.14);
   --line-soft: rgba(236, 235, 231, 0.07);
-  --serif: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  --serif: var(--sans);
   --sans: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --col: 640px;          /* 本文の幅 */
@@ -447,3 +447,38 @@ body.menu-open #menu li:nth-child(4) { transition-delay: 0.34s; }
 .snd:hover { background: rgba(0,0,0,0.6); }
 .snd[aria-pressed="true"] .hi { color: #fff; animation: nh-beat 1s ease-in-out infinite; }
 .snd[aria-pressed="true"] span::after { content: ' ON'; }
+
+
+/* ============================================================ ゴシック体で統一 ============================================================ */
+:root { --serif: var(--sans); }
+h1, h2, h3, .sec-title, .lead, .principle-card .k, .hn b, #menu li a span, .chain, .group-label, .layers .t, details.more summary, .catchcopy-list .cc { font-family: var(--sans); font-weight: 400; }
+.lead { font-weight: 300; }
+
+/* ============================================================ 02 セイセイノシクミ：四つを、同じ形で、縦に並べる ============================================================ */
+.mech { display: grid; grid-template-columns: minmax(170px, 1fr) 3fr; gap: clamp(28px, 5vw, 80px); align-items: start; margin-bottom: clamp(72px, 12vh, 150px); }
+.mtxt .hn { margin-bottom: 22px; }
+.mtxt h3 { font-size: clamp(15px, 1.4vw, 19px); font-weight: 400; letter-spacing: 0.26em; margin: 0 0 12px; }
+.mtxt p { margin: 0; font-size: 12.5px; color: var(--fg-dim); line-height: 2.1; }
+.mfilms { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 1.2vw, 16px); }
+.mfilms .film figcaption { display: none; }
+
+/* 03 インスタレーション：move・music・walk を中心に、humanの映像を、一画面にたくさん */
+.feature { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: clamp(10px, 1.6vw, 24px); align-items: center; margin-top: clamp(48px, 8vh, 96px); }
+.feature .film figcaption, .wall .film figcaption { display: none; }
+.wall { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(4px, 0.5vw, 8px); margin-top: clamp(56px, 9vh, 110px); }
+.wall .film .screen { aspect-ratio: 16 / 9; }
+
+@media (max-width: 860px) {
+  .mech { grid-template-columns: 1fr; gap: 24px; }
+  .mfilms { grid-template-columns: 1fr 1fr; }
+  .feature { grid-template-columns: 1fr; }
+  .wall { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 見出しを映像の上に置き、映像は同じ大きさで、三つずつ。四つとも、同じ形 */
+.mech { display: block; margin-bottom: clamp(80px, 13vh, 160px); }
+.mtxt { display: flex; align-items: center; gap: clamp(18px, 2.4vw, 36px); margin-bottom: clamp(22px, 3.5vh, 36px); flex-wrap: wrap; }
+.mtxt .hn { margin: 0; }
+.mtxt h3 { margin: 0; }
+.mtxt p { flex: 1 1 260px; }
+@media (max-width: 860px) { .mtxt { gap: 14px 18px; } }

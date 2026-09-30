@@ -2,11 +2,9 @@
 
 ココロノセイセイ一作品のためのサイトです。ビルド不要の静的サイトで、`main` にプッシュすると GitHub Pages へ自動デプロイされます。
 
-## 動画
+## 動画（`assets/videos/`、ポスター画像は `assets/videos/posters/` に同名の jpg）
 
-Webで使う動画は `assets/videos/`（ポスター画像は `assets/videos/posters/` に同名の jpg）。
-
-- **`samune.mp4`** … ヒーローの直後に、画面いっぱいの大きさで置く主役の映像。
-- **体験の流れ** … `scan`（位置合わせ）、`scan2`（スキャン）、`rec`（録画）、`seisei`（生成）、`human`（ライブ）。
-- **体験の記録** … `index.html` の `.drift` の `data-clips` に、ファイル名（拡張子なし）を書いたものが、グループごとに、ランダムな順序・大きさ・高さで、ゆっくり流れます。新しい動画を足すときは、mp4 と同名の jpg を置き、名前を `data-clips` に加えてください。
-- 元の撮影データ（`assets/videos/MVI_*.MP4`）は数GBあるので Git では無視しています。GitHub は1ファイル100MBまでです。
+- **`kokoro-movie.mp4`** … ヒーローの直後の主役の映像。
+- **セイセイノシクミ** … スキャン＝`scan`・`scan2`、ウゴク＝`rec`、セイセイ＝`seisei`、ヘンカ＝`human`のつく映像から、開くたびにランダムに3本（`index.html` の `data-pool`）。
+- **インスタレーション** … 中心に `move`・`music`・`walk`。その下に、`human`のつく映像を、一画面に並べて（`index.html` の `data-clips`）。
+- 元の撮影データ（`MVI_*`）や書き出し前の動画、編集ソフトのファイルは Git では無視しています。GitHub は1ファイル100MBまでなので、Webに載せるものは軽くした mp4 を置いてください。
