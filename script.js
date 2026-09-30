@@ -27,7 +27,7 @@
   // 参考映像の変容：ハートの白い粒子が、霧のように画面へ広がり、
   // その霧の中から、上のほうから順に色と形が立ち上がってビジュアルになる
   const DONE_PT = 4.2;         // 崩れはじめから、ロゴが現れるまで
-  const EXTRA = 0;             // （画面の下へはみ出す粒子は使わない。スクロール中は最初の画面が留まり、黒へ溶ける）
+  const EXTRA = 0.5;           // 画面の下へはみ出して敷く粒子。スクロールで下端が見えても、なだらかに黒へ溶けて切れ目がない
 
   const VS = `
     attribute vec2 a_uv; attribute vec4 a_col; attribute vec2 a_start; attribute vec3 a_r; attribute vec3 a_f; attribute vec3 a_g;
@@ -140,12 +140,12 @@
     if (sa > ia) { sh_ = sw / sa; sy = (motif.naturalHeight - sh_) / 2; }
     else { sw = sh_ * sa; sx = (motif.naturalWidth - sw) / 2; }
     const shExt = sh_ * (H / H0);
-    // 絵の下端を折り返して延ばし、下へ続く部分にも、途切れなく粒子の色を与える
+    // 絵の下端の縁を引き延ばし、下へ続く部分にも、途切れなく粒子の色を与える
     const nw = motif.naturalWidth, nh = motif.naturalHeight;
     const src = document.createElement('canvas'); src.width = nw; src.height = nh * 2;
     const sc = src.getContext('2d');
     sc.drawImage(motif, 0, 0);
-    sc.save(); sc.translate(0, nh * 2); sc.scale(1, -1); sc.drawImage(motif, 0, 0); sc.restore();
+    sc.drawImage(motif, 0, nh - 6, nw, 6, 0, nh, nw, nh);   // 下端の縁を縦に引き延ばして続きにする（暗い縁なので、そのまま闇へ溶ける）
     const c = document.createElement('canvas'); c.width = GX; c.height = GY;
     const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high';
     cx.drawImage(src, sx, sy, sw, shExt, 0, 0, GX, GY);
@@ -201,14 +201,6 @@
   }
   if (reduced) { heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
 
-  // 最初の画面は、スクロールのあいだ留まりながら、ゆっくり黒へ溶ける
-  function fadeHero() {
-    const R = Math.max(1, stage.offsetHeight - hero.clientHeight);
-    const k = Math.min(Math.max((window.scrollY - 0.1 * R) / (0.88 * R), 0), 1);
-    hero.style.opacity = (1 - k * k * (3 - 2 * k)).toFixed(3);
-  }
-  window.addEventListener('scroll', fadeHero, { passive: true });
-
   // ゆっくり滑らかに：0→1→0（両端で速度ゼロ）
   const breathe = (x) => 0.5 - 0.5 * Math.cos(Math.PI * 2 * x);
 
@@ -223,8 +215,7 @@
       if (burstT !== null && shownPct > 0.985) { pctEl.textContent = 100; ringBar.style.strokeDashoffset = 0; }
       if (burstT !== null && ((t >= burstT - 0.45 && shownPct > 0.97) || t >= burstT - 0.05)) loaderEl.classList.add('gone');
     }
-    const R = Math.max(1, stage.offsetHeight - hero.clientHeight), sy = window.scrollY;
-    fadeHero();
+    const sy = window.scrollY;
     if (!heartGone && !reduced) {
       if (burstT === null || t < burstT) {
         const b = breathe((t % BREATH) / BREATH);
@@ -242,7 +233,7 @@
         if (k >= 1) { heartGone = true; heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
       }
     }
-    if (burstT !== null && sy < H0 + R) {   // 画面外では描かない
+    if (burstT !== null && sy < H * 1.05) {   // 画面外では描かない
       const pt = t - burstT;
       gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform2f(uRes, W, H); gl.uniform1f(uT, pt > 0 ? pt : -1); gl.uniform1f(uDpr, DPR);
