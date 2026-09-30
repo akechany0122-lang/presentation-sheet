@@ -89,12 +89,12 @@
   const U = (n) => gl.getUniformLocation(prog, n);
   const uRes = U('u_res'), uT = U('u_t'), uDpr = U('u_dpr'), uImg = U('u_img'), uCell = U('u_cell'), uHc = U('u_hc');
 
-  const motif = new Image(), heartImg = new Image();
+  const motif = new Image(), heartImg = heartEl;   // ハートは、HTMLに埋め込んだ軽い画像をそのまま使う
   let loaded = 0, ready = false;
   function onLoad() { if (++loaded === 2) begin(); }
-  motif.onload = onLoad; heartImg.onload = onLoad;
-  motif.src = 'assets/motif_base.jpg';
-  heartImg.src = 'assets/logo2-heart-white.png';
+  motif.onload = onLoad;
+  motif.src = 'assets/motif_base.webp';
+  if (heartImg.complete && heartImg.naturalWidth) onLoad(); else heartImg.onload = onLoad;
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   let W = 0, H = 0, H0 = 0, count = 0, cell = 3, bufs = [];
@@ -174,7 +174,7 @@
       rt = setTimeout(() => { if (hero.clientWidth !== W || Math.abs(hero.clientHeight - H0) > 140) build(); }, 180);
     });
     const now = (performance.now() - tStart) / 1000;
-    burstT = reduced ? -1000 : Math.max(BREATH, Math.ceil(now / BREATH) * BREATH);
+    burstT = reduced ? -1000 : Math.max(BREATH, Math.ceil(now));   // 準備ができ次第、いちばん近い秒の区切りで崩れはじめる
     ready = true;
   }
   if (reduced) { heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
@@ -195,7 +195,7 @@
         // 崩れる：ハートは粒子に置き換わり、オーラは光として広がって消える
         const k = Math.min((t - burstT) / 0.5, 1), q = 1 - Math.pow(1 - k, 2);
         heartEl.style.opacity = String(Math.max(0, 1 - k * 3));
-        heartEl.style.transform = `translate(-50%,-50%) scale(${(1 + 0.03 * q).toFixed(4)})`;
+        heartEl.style.transform = `translate(-50%,-50%) scale(${((1 + 0.085 * breathe(burstT / BREATH)) * (1 + 0.03 * q)).toFixed(4)})`;
         auraEl.style.opacity = (0.9 * (1 - q)).toFixed(3);
         auraEl.style.transform = `translate(-50%,-50%) scale(${(1.22 + 1.6 * q).toFixed(4)})`;
         if (k >= 1) { heartGone = true; heartEl.style.display = 'none'; auraEl.style.display = 'none'; }
@@ -250,7 +250,8 @@
       track.style.setProperty('--dir', d.dataset.dir === 'right' ? 'reverse' : 'normal');
     });
   }
-  layout();
+  // 冒頭の演出を邪魔しないよう、ブラウザが手すきになってから組む
+  if (window.requestIdleCallback) requestIdleCallback(layout, { timeout: 2500 }); else setTimeout(layout, 800);
 })();
 
 /* ================================================================
