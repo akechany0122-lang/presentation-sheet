@@ -544,3 +544,6 @@ h1, h2, h3, .sec-title, .lead, .principle-card .k, .hn b, #menu li a span, .chai
 /* タイトルのハートの周りを押すと、少しだけ下へ */
 #hero-hit { position: absolute; left: 50%; top: 50%; z-index: 5; width: calc(var(--heart) * 2.6); aspect-ratio: 1; transform: translate(-50%, -50%); border: 0; border-radius: 50%; background: transparent; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 #hero-hit:focus-visible { outline: 1px solid rgba(255,255,255,0.5); outline-offset: 4px; }
+
+/* ヒーローの映像の左下に、小さく */
+.bgm { position: absolute; left: clamp(16px, 3vw, 44px); bottom: clamp(16px, 3vw, 40px); z-index: 4; margin: 0; font-size: 10px; letter-spacing: 0.14em; line-height: 1.6; color: rgba(236,235,231,0.6); text-shadow: 0 0 8px rgba(0,0,0,0.7); pointer-events: none; }
